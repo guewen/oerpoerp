@@ -2,7 +2,7 @@
 
 require 'rubygems'
 require 'hoe'
-require 'facets'
+require 'hashery'
 
 # Hoe.plugin :compiler
 # Hoe.plugin :gem_prelude_sucks
@@ -15,7 +15,6 @@ Hoe.spec 'oerpoerp' do
   # you'll never have to touch them again!
   # (delete this comment too, of course)
 
-  # developer('FIX', 'FIX@example.com')
+  developer('Guewen Baconnier', 'guewen@gmail.com')
 
-  # self.rubyforge_name = 'oerpoerpx' # if different than 'oerpoerp'
 end

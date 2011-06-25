@@ -1,0 +1,47 @@
+name :product
+depends [:product_category]
+
+source_reader :ooor
+target_writer :ooor
+
+before do
+  puts "before"
+end
+
+from_iterator do
+#  source.find...
+  [
+  {:id => 1,
+   :name => 'cauliflower',
+   :price => 3.0,
+   :category => 1},
+  {:id => 2,
+   :name => 'Mango',
+   :price => 5.0,
+  :category => 2},
+  {:id => 2,
+   :name => 'Carrot',
+   :price => 0.5,
+   :category => 1}
+  ]
+end
+
+after do
+  puts "after"
+end
+
+lines_actions do
+
+  before do |source_line|
+    puts "line before "
+  end
+
+  set_value(:price) do |source_line|
+    source_line[:price] * 10
+  end
+
+  after do |source_line|
+    puts "line after"
+  end
+
+end
