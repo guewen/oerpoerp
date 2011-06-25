@@ -5,11 +5,12 @@ class MigrateBase
   def initialize(&block)
     @name = nil
     @depends = []
-    @read_method = :ooor
-    @write_method = :ooor
+    @source_reader = :ooor
+    @target_writer = :ooor
     @from_iterator = proc{}
     @before_action = proc{}
     @after_action = proc{}
+    @fields_definition = {}
     instance_eval(&block) if block
   end
 
@@ -27,12 +28,12 @@ class MigrateBase
     @depends = depends
   end
 
-  def read_method(method)
-    @read_method = method
+  def source_reader(method)
+    @source_reader = method
   end
 
-  def write_method(method)
-    @write_method = method
+  def target_writer(method)
+    @target_writer = method
   end
 
   def from_iterator(&block)
@@ -59,6 +60,9 @@ class MigrateBase
     @lines_actions = MigrateLineBase.new(&block)
   end
 
+  def introspect_fields
+
+  end
 
 end
 

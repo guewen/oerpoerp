@@ -1,7 +1,7 @@
 name :product
 
-read_method :ooor
-write_method :ooor
+source_reader :ooor
+target_writer :ooor
 
 before do
   puts "before"

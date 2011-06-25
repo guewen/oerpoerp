@@ -1,0 +1,8 @@
+.autotest
+History.txt
+Manifest.txt
+README.txt
+Rakefile
+bin/oerpoerp
+lib/oerpoerp.rb
+specs/test_oerpoerp.rb
