@@ -4,6 +4,7 @@ require 'rubygems'
 require 'hashery/orderedhash'
 
 require File.dirname(__FILE__) + '/migrate/base'
+require File.dirname(__FILE__) + '/migrate/fields_introspection'
 
 module OerpOerp
 

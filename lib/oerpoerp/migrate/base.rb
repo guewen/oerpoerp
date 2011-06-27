@@ -8,13 +8,13 @@ module OerpOerp
     def initialize(&block)
       @name = nil
       @depends = []
-      @source_reader = :ooor
-      @target_writer = :ooor
+      @source_method = :ooor
+      @target_method = :ooor
       @source_model = nil
       @target_model = nil
-      @from_iterator = proc{}
-      @before_action = proc{}
-      @after_action = proc{}
+      @from_iterator = Proc.new {}
+      @before_action = Proc.new {}
+      @after_action = Proc.new {}
       @fields_definition = {}
       instance_eval(&block) if block
     end
@@ -33,12 +33,12 @@ module OerpOerp
       @depends = depends
     end
 
-    def source_reader(method)
-      @source_reader = method
+    def source_method(method)
+      @source_method = method
     end
 
-    def target_writer(method)
-      @target_writer = method
+    def target_method(method)
+      @target_method = method
     end
 
     def source_model(model)
@@ -70,23 +70,26 @@ module OerpOerp
       introspect_fields
       @before_action.call
       @from_iterator.call.each do |from|
-        @lines_actions.run(from)
+        lines_actions.run(from)
       end
       @after_action.call
     end
 
-    def lines_actions(&block)
+    def do_lines_actions(&block)
       @lines_actions = MigrateLineBase.new(self, &block)
+    end
+
+    private
+
+    def lines_actions
+      @lines_actions ||= MigrateLineBase.new(self)
     end
 
     def introspect_fields
       # automatic introspection
-      @fields_definition =
-          {:id => {:type => :integer},
-           :name => {:type => :string},
-           :price => {:type => :float},
-           :category => {:type => :many2one, :relation => :product_category}
-           }
+      @fields_definition = FieldsIntrospection.new
+      @fields_definition.introspect
+      pp @fields_definition
     end
 
   end
@@ -98,10 +101,10 @@ module OerpOerp
 
     def initialize(migration, &block)
       @migration = migration
-      @before_action = proc{}
-      @before_save_action = proc{}
+      @before_action = Proc.new {}
+      @before_save_action = Proc.new {}
       @setters = OrderedHash.new
-      @after_action = proc{}
+      @after_action = Proc.new {}
       instance_eval(&block) if block
     end
 
@@ -117,43 +120,40 @@ module OerpOerp
       @after_action = block
     end
 
-    def set_integer(to_field)
-      # must return a block
-      Proc.new { |source_line| source_line[to_field].to_i }
-    end
-
-    def set_float(to_field)
-      # must return a block
-      Proc.new { |source_line| source_line[to_field].to_f }
-    end
-
-    def set_string(to_field)
-      # must return a block
-      Proc.new { |source_line| source_line[to_field].to_s }
-    end
-
-    def set_boolean(to_field)
-      # must return a block
-      Proc.new { |source_line| source_line[to_field] }
-    end
-
-    def set_many2one(to_field)
-      # must return a block
-    end
-
     def set_value(to_field, &block)
       if block_given?
         @setters[to_field] = block
       else
-        # according to field defintion, call the good method (copy simple value / many2one...)
-        field_definition = migration.fields_definition[to_field]
+        # according to field definition, call the good method (copy simple value / many2one...)
+        field_definition = migration.fields_definition.matching_fields[to_field]
         raise "No #{to_field} found in the fields introspection" unless field_definition
         @setters[to_field] = self.send "set_#{field_definition[:type]}", to_field
       end
     end
 
+    def save
+      pp self
+    end
+
+    def run(source_line)
+      @before_action.call(source_line, self)
+      create_default_setters
+      @setters.each do |to_field, setter|
+        if setter
+          self[to_field] = setter.call(source_line, self)
+        else
+          puts "No setter defined for field #{to_field}"
+        end
+      end
+      @before_save_action.call(source_line, self)
+      save
+      @after_action.call(source_line, self)
+    end
+
+    private
+
     def create_default_setters
-      migration.fields_definition.keys.each do |field|
+      migration.fields_definition.matching_fields.keys.each do |field|
         unless @setters.keys.include? field
           # fixme do not use block but
           set_value(field)
@@ -161,24 +161,37 @@ module OerpOerp
       end
     end
 
-    def save
-
+    def set_integer(to_field)
+      # must return a block
+      Proc.new { |source_line, target_line| source_line[to_field] }
     end
 
-    def run(source_line)
-      @before_action.call(source_line)
-      create_default_setters
-      @setters.each do |to_field, setter|
-        if setter
-          self[to_field] = setter.call(source_line)
-        else
-          puts "No setter defined for field #{to_field}"
-        end
-      end
-      @before_save_action.call(source_line)
-      save
-      @after_action.call(source_line)
-      pp self
+    def set_float(to_field)
+      # must return a block
+      Proc.new { |source_line, target_line| source_line[to_field] }
+    end
+
+    def set_string(to_field)
+      # must return a block
+      Proc.new { |source_line, target_line| source_line[to_field] }
+    end
+
+    def set_boolean(to_field)
+      # must return a block
+      Proc.new { |source_line, target_line| source_line[to_field] }
+    end
+
+    def set_many2one(to_field)
+      # must return a block
+    end
+
+    def set_many2many(to_field)
+      # must return a block
+    end
+
+    def set_parent(to_field)
+      # used for many2one on the same object
+      # must return a block
     end
 
   end

@@ -1,8 +1,11 @@
 name :product
 depends [:product_category]
 
-source_reader :ooor
-target_writer :ooor
+source_method :ooor
+target_method :ooor
+
+source_model :product_product
+target_model :product_product
 
 before do
   puts "before"
@@ -30,17 +33,17 @@ after do
   puts "after"
 end
 
-lines_actions do
+do_lines_actions do
 
-  before do |source_line|
+  before do |source_line, target_line|
     puts "line before "
   end
 
-  set_value(:price) do |source_line|
+  set_value(:price) do |source_line, target_line|
     source_line[:price] * 10
   end
 
-  after do |source_line|
+  after do |source_line, target_line|
     puts "line after"
   end
 
