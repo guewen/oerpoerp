@@ -8,14 +8,28 @@ module OerpOerp
     def initialize(&block)
       @name = nil
       @depends = []
+
       @source_method = :ooor
       @target_method = :ooor
+
       @source_model = nil
       @target_model = nil
+
+      @source_fields = {}
+      @target_fields = {}
+
       @from_iterator = Proc.new {}
       @before_action = Proc.new {}
       @after_action = Proc.new {}
-      @fields_definition = {}
+
+      @source = ProxySource.proxy_for(@source_method)
+      @target = ProxyTarget.proxy_for(@target_method)
+
+      @source_fields = ProxyFieldsIntrospection.proxy_for(@source_method)
+      @target_fields = ProxyFieldsIntrospection.proxy_for(@target_method)
+      @fields_definition = FieldsDefinition.new(@source, @target)
+#      @references = ImportReferences.create(@target_method)
+
       instance_eval(&block) if block
     end
 
@@ -66,13 +80,25 @@ module OerpOerp
       @after_action = block
     end
 
-    def run
-      introspect_fields
+    def run_import
       @before_action.call
       @from_iterator.call.each do |from|
         lines_actions.run(from)
       end
       @after_action.call
+    end
+
+    def run
+      introspect_fields
+
+      # display resume of fields and actions
+      # display fields that will be migrated
+      # display the ones which are different with exemples of DSL to migrate them
+      # display the ones which are only on source or target with examples of DSL to migrate them
+
+      # run import if option is on
+      run_import
+
     end
 
     def do_lines_actions(&block)
@@ -86,10 +112,8 @@ module OerpOerp
     end
 
     def introspect_fields
-      # automatic introspection
-      @fields_definition = FieldsIntrospection.new
       @fields_definition.introspect
-      pp @fields_definition
+      @fields_definition.display_fields if OPTIONS[:verbose]
     end
 
   end
@@ -183,6 +207,8 @@ module OerpOerp
 
     def set_many2one(to_field)
       # must return a block
+      # get relation id using the relation of fields introspection and the
+      # class used for the references
     end
 
     def set_many2many(to_field)
@@ -191,6 +217,9 @@ module OerpOerp
 
     def set_parent(to_field)
       # used for many2one on the same object
+      # how to manage assignation to parents not already imported ?
+      # create an array on MigrationBase and fill it with the ids to update ?
+      # Maybe fill it with Proc updates ?
       # must return a block
     end
 
