@@ -1,7 +1,7 @@
-require 'pp'
-
 require 'rubygems'
+require 'pp'
 require 'colorize'
+require 'hirb'
 require 'hashery/orderedhash'
 
 require File.dirname(__FILE__) + '/migrate/base'
@@ -26,8 +26,6 @@ module OerpOerp
 
   r = MigrateBase.new
   r.initialize_from_file( ARGV[0] )
-
-  pp r
   r.run
 
 end

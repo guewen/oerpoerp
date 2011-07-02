@@ -22,6 +22,11 @@ module OerpOerp
     # and DSL examples to import them
     def display_fields
 
+      # TODO redo the display (using HIRB ?))
+
+      puts "\n"
+      puts "Fields introspection of models"
+
       puts "\n"
       puts "Fields only on source :".yellow
       puts "None".green if source_only_fields.empty?
@@ -48,7 +53,7 @@ module OerpOerp
       end
 
       puts "\n"
-      puts "Matching fields (those ones will be automatically migrated if you do not redefine them in the migration file) :".green
+      puts "Matching fields (those ones will automatically be migrated if you do not redefine them in the migration file) :".green
       puts "None".red if matching_fields.empty?
       matching_fields.each do |field, definition|
         puts "#{field} - #{definition[:type]}".green

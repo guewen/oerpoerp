@@ -2,7 +2,7 @@ module OerpOerp
   class MigrateBase
 
     attr_accessor :name, :depends
-    attr_reader :fields_definition
+    attr_reader :fields_definition, :source, :target
 
 
     def initialize(&block)
@@ -81,24 +81,18 @@ module OerpOerp
     end
 
     def run_import
-      @before_action.call
+      @before_action.call unless OPTIONS[:simulation]
       @from_iterator.call.each do |from|
         lines_actions.run(from)
       end
-      @after_action.call
+      @after_action.call unless OPTIONS[:simulation]
     end
 
     def run
+      puts "Starting import of #{@name} migration file from #{@source_model} model to #{@target_model} model"
       introspect_fields
-
-      # display resume of fields and actions
-      # display fields that will be migrated
-      # display the ones which are different with exemples of DSL to migrate them
-      # display the ones which are only on source or target with examples of DSL to migrate them
-
-      # run import if option is on
+      puts "Starting lines import"
       run_import
-
     end
 
     def do_lines_actions(&block)
@@ -119,19 +113,53 @@ module OerpOerp
   end
 
 
-  class MigrateLineBase < Hash
+  class MigrateLineBase
 
-    attr_reader :migration
+    attr_reader :migration, :source_line
 
     def initialize(migration, &block)
       @migration = migration
+      @source_line = {}
       @before_action = Proc.new {}
       @before_save_action = Proc.new {}
       @setters = OrderedHash.new
       @after_action = Proc.new {}
+
+      # auto migrate options
+      @only_fields = false
+      @skip_fields = [:id]  # do not migrate id !
+
+      @source = migration.source
+      @target = migration.target
+
+      @create = false
+
+      @line = {}
+
       instance_eval(&block) if block
     end
 
+    def run(source_line)
+      @source_line = source_line
+      @before_action.call(source_line, @line) unless OPTIONS[:simulation]
+      create_default_setters
+      run_setters(source_line)
+      @before_save_action.call(source_line, @line) unless OPTIONS[:simulation]
+      save
+      @after_action.call(source_line, @line) unless OPTIONS[:simulation]
+    end
+
+    def run_setters(source_line)
+      @setters.each do |to_field, setter|
+        if setter
+          @line[to_field] = setter.call(source_line, @line)
+        else
+          puts "No setter defined for field #{to_field}"
+        end
+      end
+    end
+
+    ##### DSL methods #####
     def before(&block)
       @before_action = block
     end
@@ -142,6 +170,22 @@ module OerpOerp
 
     def after(&block)
       @after_action = block
+    end
+
+    def auto_migrate_fields(options)
+      if options.kind_of?(Hash)
+        if options[:only]
+          @only_fields = options[:only]
+          return
+        end
+        if options[:exclude]
+          @skip_fields += options[:exclude]
+          return
+        end
+      end
+      unless options
+        @only_fields = []
+      end
     end
 
     def set_value(to_field, &block)
@@ -155,33 +199,14 @@ module OerpOerp
       end
     end
 
-    def save
-      pp self
-    end
-
-    def run(source_line)
-      @before_action.call(source_line, self)
-      create_default_setters
-      @setters.each do |to_field, setter|
-        if setter
-          self[to_field] = setter.call(source_line, self)
-        else
-          puts "No setter defined for field #{to_field}"
-        end
-      end
-      @before_save_action.call(source_line, self)
-      save
-      @after_action.call(source_line, self)
-    end
-
     private
 
     def create_default_setters
       migration.fields_definition.matching_fields.keys.each do |field|
-        unless @setters.keys.include? field
-          # fixme do not use block but
-          set_value(field)
-        end
+        next if @skip_fields && @skip_fields.include?(field)
+        next if @only_fields && !@only_fields.include?(field)
+        next if @setters.keys.include?(field)
+        set_value(field)
       end
     end
 
@@ -209,6 +234,7 @@ module OerpOerp
       # must return a block
       # get relation id using the relation of fields introspection and the
       # class used for the references
+      Proc.new { |source_line, target_line| 1 }
     end
 
     def set_many2many(to_field)
@@ -222,6 +248,22 @@ module OerpOerp
       # Maybe fill it with Proc updates ?
       # must return a block
     end
+
+    def save
+      if OPTIONS[:simulation]
+        # pretty display
+        # TODO replace puts by logs
+        # fixme : does not display cols existing in line and not in source_line
+        display_source_line = @source_line.dup
+        display_line = @line.dup
+        @line.keys.each { |key| display_source_line[key] = nil unless display_source_line.keys.include? key}
+        puts Hirb::Helpers::Table.render [display_source_line.update('' => 'source'), display_line.update('' => 'target')], :description => false
+        puts "\n"
+      else
+        @target.save(@line)
+      end
+    end
+
 
   end
 end

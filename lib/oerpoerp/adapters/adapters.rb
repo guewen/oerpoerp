@@ -40,6 +40,12 @@ module OerpOerp
   class ProxyTarget
     include AdaptersFactory
     @proxy_classes = []
+
+
+    def save(data_record)
+
+    end
+
   end
 
 
