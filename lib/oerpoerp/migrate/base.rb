@@ -9,14 +9,9 @@ module OerpOerp
       @name = nil
       @depends = []
 
+      # default method if not overriden in migration files is ooor
       @source_method = :ooor
       @target_method = :ooor
-
-      @source_model = nil
-      @target_model = nil
-
-      @source_fields = {}
-      @target_fields = {}
 
       @from_iterator = Proc.new {}
       @before_action = Proc.new {}
@@ -25,10 +20,7 @@ module OerpOerp
       @source = ProxySource.proxy_for(@source_method)
       @target = ProxyTarget.proxy_for(@target_method)
 
-      @source_fields = ProxyFieldsIntrospection.proxy_for(@source_method)
-      @target_fields = ProxyFieldsIntrospection.proxy_for(@target_method)
-      @fields_definition = FieldsDefinition.new(@source, @target)
-#      @references = ImportReferences.create(@target_method)
+      @fields_definition = FieldsDefinition.new
 
       instance_eval(&block) if block
     end
@@ -56,16 +48,16 @@ module OerpOerp
     end
 
     def source_model(model)
-      @source_model = model
+      @source.model_name = model
     end
 
     def target_model(model)
-      @target_model = model
+      @target.model_name = model
     end
 
     def source
       # implement in modules (like SOURCE_OOOR::ProductProduct / SOURCE_DB[:product_product])
-      @source_model
+      @source.model
     end
 
     def from_iterator(&block)
@@ -82,14 +74,18 @@ module OerpOerp
 
     def run_import
       @before_action.call unless OPTIONS[:simulation]
-      @from_iterator.call.each do |from|
-        lines_actions.run(from)
+      unless @from_iterator.nil?    # fix : exception when not defined in migr. file
+        @from_iterator.call.each do |from|
+          lines_actions.run(from)
+        end
       end
       @after_action.call unless OPTIONS[:simulation]
+      @source.disconnect
     end
 
     def run
       puts "Starting import of #{@name} migration file from #{@source_model} model to #{@target_model} model"
+      @source.connect
       introspect_fields
       puts "Starting lines import"
       run_import
@@ -106,8 +102,8 @@ module OerpOerp
     end
 
     def introspect_fields
-      @fields_definition.introspect
-      @fields_definition.display_fields if OPTIONS[:verbose]
+      @fields_definition.compare(@source.fields, @target.fields)
+      @fields_definition.display if OPTIONS[:verbose]
     end
 
   end
@@ -212,18 +208,21 @@ module OerpOerp
 
     def set_integer(to_field)
       # must return a block
-      Proc.new { |source_line, target_line| source_line[to_field] }
+      Proc.new { |source_line, target_line| source_line[to_field].to_i }
     end
+    alias_method  :set_integer_big, :set_integer
 
     def set_float(to_field)
       # must return a block
-      Proc.new { |source_line, target_line| source_line[to_field] }
+      Proc.new { |source_line, target_line| source_line[to_field].to_f }
     end
 
-    def set_string(to_field)
+    def set_char(to_field)
       # must return a block
-      Proc.new { |source_line, target_line| source_line[to_field] }
+      Proc.new { |source_line, target_line| source_line[to_field].to_s }
     end
+    alias_method :set_text, :set_char
+    alias_method :set_selection, :set_char
 
     def set_boolean(to_field)
       # must return a block
@@ -234,12 +233,19 @@ module OerpOerp
       # must return a block
       # get relation id using the relation of fields introspection and the
       # class used for the references
+      # fixme: return right relation instead of 1...
       Proc.new { |source_line, target_line| 1 }
     end
 
     def set_many2many(to_field)
       # must return a block
     end
+
+    def set_datetime(to_field)
+      # must return a block
+      Proc.new { |source_line, target_line| source_line[to_field] }
+    end
+    alias_method :set_date, :set_datetime
 
     def set_parent(to_field)
       # used for many2one on the same object

@@ -3,6 +3,7 @@ require 'pp'
 require 'colorize'
 require 'hirb'
 require 'hashery/orderedhash'
+require 'ooor'
 
 require File.dirname(__FILE__) + '/migrate/base'
 require File.dirname(__FILE__) + '/migrate/fields_definition'
@@ -15,9 +16,25 @@ Dir[File.join(MODELS_PATH, '**/*.rb')].each do |file|
 end
 
 
-# implement options
-OPTIONS = {:verbose => true,
-           :simulation => true}
+# TODO implement options
+OPTIONS = {
+  :verbose => true,
+  :simulation => true,
+  :ooor => {
+      :source => {
+        :url => 'http://localhost:8069/xmlrpc',
+        :database => 'oerp_source',
+        :username => 'admin',
+        :password => 'admin'
+      },
+      :target => {
+        :url => 'http://localhost:8079/xmlrpc',
+        :database => 'oerp_target',
+        :username => 'admin',
+        :password => 'admin'
+      }
+    }
+  }
 
 module OerpOerp
 

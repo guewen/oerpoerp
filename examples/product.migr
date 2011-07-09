@@ -4,8 +4,8 @@ depends [:product_category]
 source_method :ooor
 target_method :ooor
 
-source_model :product_product
-target_model :product_product
+source_model "product.product"
+target_model "product.product"
 
 before do
   puts "before"
@@ -35,12 +35,20 @@ end
 
 do_lines_actions do
 
+#  auto_migrate_fields false
+#  auto_migrate_fields :only => [:name]
+#  auto_migrate_fields :exclude => [:name]
+
   before do |source_line, target_line|
     puts "line before "
   end
 
   set_value(:price) do |source_line, target_line|
     source_line[:price] * 10
+  end
+
+  set_value(:foo) do |source_line, target_line|
+    'bar'
   end
 
   after do |source_line, target_line|

@@ -2,7 +2,7 @@ module OerpOerp
   module AdaptersFactory
 
     module ClassMethods
-      attr_reader :proxy_classes
+      attr_reader :proxy_classes, :proxy
 
       def proxy_for(method)
         proxy_class = self.proxy_classes.find do |klass|
@@ -13,11 +13,11 @@ module OerpOerp
       end
 
       def register_proxy(proxy)
-        @proxy_for = proxy
+        @proxy = proxy
       end
 
       def proxy_for?(proxy)
-        @proxy_for == proxy
+        @proxy == proxy
       end
 
       def inherited(subclass)
@@ -29,29 +29,32 @@ module OerpOerp
       host_class.extend(ClassMethods)
     end
 
+    def adapter_options
+      @adapter_options ||= OPTIONS[self.class.proxy]
+    end
+
   end
 
 
   class ProxySource
     include AdaptersFactory
     @proxy_classes = []
+
+    attr_accessor :model_name
+    attr_reader :model
+
   end
 
   class ProxyTarget
     include AdaptersFactory
     @proxy_classes = []
 
+    attr_accessor :model_name
+    attr_reader :model
 
     def save(data_record)
 
     end
-
-  end
-
-
-  class ProxyFieldsIntrospection
-    include AdaptersFactory
-    @proxy_classes = []
 
   end
 

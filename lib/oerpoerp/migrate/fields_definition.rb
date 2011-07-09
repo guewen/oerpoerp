@@ -1,26 +1,18 @@
 module OerpOerp
 
   class FieldsDefinition
-    attr_reader :source_fields, :target_fields, :matching_fields, :source_only_fields, :target_only_fields, :conflicting_fields
+    attr_reader :matching_fields, :source_only_fields, :target_only_fields, :conflicting_fields
 
-    def initialize(source_fields, target_fields)
-      @source_fields = source_fields
-      @target_fields = target_fields
+    def initialize
       @matching_fields = {}
       @source_only_fields = {}
       @target_only_fields = {}
       @conflicting_fields = {}
     end
 
-    def introspect
-      @source_fields.introspect
-      @target_fields.introspect
-      compare_fields
-    end
-
     # display a nice (not for the moment) output with all infos on fields
     # and DSL examples to import them
-    def display_fields
+    def display
 
       # TODO redo the display (using HIRB ?))
 
@@ -62,14 +54,12 @@ module OerpOerp
       puts "\n"
     end
 
-    private
-
-    def compare_fields
+    def compare(source_fields, target_fields)
       # compare source and target
       @source_only_fields = {:old_data => {:type => :integer}}
       @matching_fields =
       {:id => {:type => :integer},
-       :name => {:type => :string},
+       :name => {:type => :char},
        :price => {:type => :float},
        :category => {:type => :many2one, :relation => :product_category}
        }
