@@ -12,6 +12,7 @@ module OerpOerp
 
         @fields[field.name] = specs
       end
+      @fields
     end
   end
 

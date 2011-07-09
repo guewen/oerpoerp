@@ -55,6 +55,7 @@ module OerpOerp
     end
 
     def compare(source_fields, target_fields)
+      pp target_fields
       # compare source and target
       @source_only_fields = {:old_data => {:type => :integer}}
       @matching_fields =
