@@ -6,7 +6,7 @@ require 'hashery/orderedhash'
 require 'ooor'
 
 require File.dirname(__FILE__) + '/migrate/base'
-require File.dirname(__FILE__) + '/migrate/fields_definition'
+require File.dirname(__FILE__) + '/migrate/fields_analyzer'
 require File.dirname(__FILE__) + '/adapters/adapters'
 
 # load all adapters

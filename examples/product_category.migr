@@ -1,7 +1,10 @@
-name :product
+name :product_category
 
 source_method :ooor
 target_method :ooor
+
+source_model "product.category"
+target_model "product.category"
 
 before do
   puts "before"

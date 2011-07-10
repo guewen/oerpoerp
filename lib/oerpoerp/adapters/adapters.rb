@@ -2,7 +2,7 @@ module OerpOerp
   module AdaptersFactory
 
     module ClassMethods
-      attr_reader :proxy_classes, :proxy
+      attr_reader :proxy_classes, :proxy, :connection_from
 
       def proxy_for(method)
         proxy_class = self.proxy_classes.find do |klass|
@@ -10,6 +10,10 @@ module OerpOerp
         end
         return proxy_class.new if proxy_class
         nil
+      end
+
+      def connect_from(from)
+        @connection_from = from
       end
 
       def register_proxy(proxy)

@@ -1,6 +1,6 @@
 module OerpOerp
 
-  class FieldsDefinition
+  class FieldsAnalyzer
     attr_reader :matching_fields, :source_only_fields, :target_only_fields, :conflicting_fields
 
     def initialize
@@ -23,14 +23,14 @@ module OerpOerp
       puts "Fields only on source :".yellow
       puts "None".green if source_only_fields.empty?
       source_only_fields.each do |field, definition|
-        puts "#{field} - #{definition[:type]}".yellow
+        puts "#{field} - #{definition[:ttype]}".yellow
       end
 
       puts "\n"
       puts "Fields only on target :".yellow
       puts "None".green if target_only_fields.empty?
       target_only_fields.each do |field, definition|
-        puts "#{field} - #{definition[:type]}".yellow
+        puts "#{field} - #{definition[:ttype]}".yellow
         puts "    set_value(:#{field}) do |source_line, target_line|\n" <<
              "      source_line['bar']\n" <<
              "    end"
@@ -48,24 +48,36 @@ module OerpOerp
       puts "Matching fields (those ones will automatically be migrated if you do not redefine them in the migration file) :".green
       puts "None".red if matching_fields.empty?
       matching_fields.each do |field, definition|
-        puts "#{field} - #{definition[:type]}".green
+        puts "#{field} - #{definition[:ttype]} #{definition[:relation]}".green
       end
 
       puts "\n"
     end
 
     def compare(source_fields, target_fields)
-      pp target_fields
       # compare source and target
-      @source_only_fields = {:old_data => {:type => :integer}}
-      @matching_fields =
-      {:id => {:type => :integer},
-       :name => {:type => :char},
-       :price => {:type => :float},
-       :category => {:type => :many2one, :relation => :product_category}
-       }
-      @target_only_fields = {:foo => {:type => :integer}}
-      @conflicting_fields = ['category']
+      @source_only_fields = one_side_fields(source_fields, target_fields)
+      @target_only_fields = one_side_fields(target_fields, source_fields)
+
+      @matching_fields = {}
+      @conflicting_fields = []
+      same_fields_keys = source_fields.keys - @source_only_fields.keys
+      same_fields_keys.each do |field|
+        if source_fields[field] == target_fields[field]
+          @matching_fields[field] = source_fields[field]
+        else
+          @conflicting_fields << field
+        end
+      end
+
+    end
+
+    private
+
+    def one_side_fields(left_fields, right_fields)
+      only_left = {}
+      (left_fields.keys - right_fields.keys).each { |field| only_left[field] = left_fields[field] }
+      only_left
     end
 
   end

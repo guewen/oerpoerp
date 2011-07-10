@@ -11,7 +11,7 @@ before do
   puts "before"
 end
 
-from_iterator do
+set_source_iterator do
 #  source.find...
   [
   {:id => 1,

@@ -1,11 +1,12 @@
 module OerpOerp
 
+  require File.dirname(__FILE__) + '/modules/ooor_common'
+
   class OoorTarget < ProxyTarget
-    include OoorFieldsIntrospection
-    include OoorImportReferences
+    include OoorCommon
 
     register_proxy :ooor
-
+    connect_from :target
 
     def save(data_record)
       data_record ||= {}

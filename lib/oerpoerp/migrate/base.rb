@@ -13,14 +13,14 @@ module OerpOerp
       @source_method = :ooor
       @target_method = :ooor
 
-      @from_iterator = Proc.new {}
+      @from_iterator = nil
       @before_action = Proc.new {}
       @after_action = Proc.new {}
 
       @source = ProxySource.proxy_for(@source_method)
       @target = ProxyTarget.proxy_for(@target_method)
 
-      @fields_definition = FieldsDefinition.new
+      @fields_definition = FieldsAnalyzer.new
 
       instance_eval(&block) if block
     end
@@ -60,8 +60,13 @@ module OerpOerp
       @source.model
     end
 
-    def from_iterator(&block)
-      @from_iterator = block
+    def set_source_iterator(&block)
+      @source_iterator = block
+    end
+
+    def source_iterator
+      @source_iterator ||= @source.default_iterator
+      @source_iterator
     end
 
     def before(&block)
@@ -74,10 +79,8 @@ module OerpOerp
 
     def run_import
       @before_action.call unless OPTIONS[:simulation]
-      unless @from_iterator.nil?    # fix : exception when not defined in migr. file
-        @from_iterator.call.each do |from|
-          lines_actions.run(from)
-        end
+      source_iterator.call.each do |from|
+        lines_actions.run(from)
       end
       @after_action.call unless OPTIONS[:simulation]
       @source.disconnect
@@ -86,6 +89,7 @@ module OerpOerp
     def run
       puts "Starting import of #{@name} migration file from #{@source_model} model to #{@target_model} model"
       @source.connect
+      @target.connect
       introspect_fields
       puts "Starting lines import"
       run_import
@@ -125,14 +129,19 @@ module OerpOerp
       @only_fields = false
       @skip_fields = [:id]  # do not migrate id !
 
-      @source = migration.source
-      @target = migration.target
-
       @create = false
 
       @line = {}
 
       instance_eval(&block) if block
+    end
+
+    def source
+      @migration.source
+    end
+
+    def target
+      @migration.target
     end
 
     def run(source_line)
@@ -191,7 +200,7 @@ module OerpOerp
         # according to field definition, call the good method (copy simple value / many2one...)
         field_definition = migration.fields_definition.matching_fields[to_field]
         raise "No #{to_field} found in the fields introspection" unless field_definition
-        @setters[to_field] = self.send "set_#{field_definition[:type]}", to_field
+        @setters[to_field] = self.send "set_#{field_definition[:ttype]}", to_field
       end
     end
 
@@ -208,25 +217,30 @@ module OerpOerp
 
     def set_integer(to_field)
       # must return a block
-      Proc.new { |source_line, target_line| source_line[to_field].to_i }
+      Proc.new { |source_line, target_line| source_line.send(to_field).to_i }
     end
     alias_method  :set_integer_big, :set_integer
 
     def set_float(to_field)
       # must return a block
-      Proc.new { |source_line, target_line| source_line[to_field].to_f }
+
+      Proc.new { |source_line, target_line| source_line.send(to_field).to_f }
     end
 
     def set_char(to_field)
       # must return a block
-      Proc.new { |source_line, target_line| source_line[to_field].to_s }
+      Proc.new { |source_line, target_line| source_line.send(to_field).to_s }
     end
     alias_method :set_text, :set_char
     alias_method :set_selection, :set_char
 
     def set_boolean(to_field)
       # must return a block
-      Proc.new { |source_line, target_line| source_line[to_field] }
+      Proc.new { |source_line, target_line| source_line.send(to_field) }
+    end
+
+    def set_one2many(to_field)
+      # skip !
     end
 
     def set_many2one(to_field)
@@ -243,7 +257,7 @@ module OerpOerp
 
     def set_datetime(to_field)
       # must return a block
-      Proc.new { |source_line, target_line| source_line[to_field] }
+      Proc.new { |source_line, target_line| source_line.send(to_field) }
     end
     alias_method :set_date, :set_datetime
 
@@ -260,10 +274,11 @@ module OerpOerp
         # pretty display
         # TODO replace puts by logs
         # fixme : does not display cols existing in line and not in source_line
-        display_source_line = @source_line.dup
+        # fixme move stuff relative to ooor in adapter
+        display_source_line = @source_line.attributes.merge(@source_line.associations)
         display_line = @line.dup
         @line.keys.each { |key| display_source_line[key] = nil unless display_source_line.keys.include? key}
-        puts Hirb::Helpers::Table.render [display_source_line.update('' => 'source'), display_line.update('' => 'target')], :description => false
+        puts Hirb::Helpers::Table.render [display_source_line.update('' => 'source'), display_line.update('' => 'target')], :description => false, :resize => false
         puts "\n"
       else
         @target.save(@line)

@@ -4,10 +4,9 @@ module OerpOerp
 
   class OoorSource < ProxySource
     include OoorCommon
-    include OoorFieldsIntrospection
-    include OoorImportReferences
 
     register_proxy :ooor
+    connect_from :source
 
   end
 
