@@ -6,6 +6,7 @@ require 'hashery/orderedhash'
 require 'ooor'
 
 require File.dirname(__FILE__) + '/migrate/base'
+require File.dirname(__FILE__) + '/migrate/pooler'
 require File.dirname(__FILE__) + '/migrate/fields_analyzer'
 require File.dirname(__FILE__) + '/adapters/adapters'
 
@@ -42,6 +43,8 @@ module OerpOerp
 
 
   r = MigrateBase.new
+  Pooler.get(:ooor, :source)
+  Pooler.get(:ooor, :target)
   r.initialize_from_file( ARGV[0] )
   r.run
 

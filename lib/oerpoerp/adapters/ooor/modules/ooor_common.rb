@@ -3,18 +3,13 @@ module OerpOerp
   module OoorCommon
     attr_reader :ooor_prefix
 
-    def connect
-      @oerp = Ooor.new(adapter_options[self.class.connection_from].
-                           merge(:log_level => Logger::INFO,
-                                 :scope_prefix => ooor_prefix_name))
-    end
-
     def default_iterator
       Proc.new { model.all }
     end
 
     def model
-      @model ||= @oerp.const_get(@model_name)
+      model_ooor = Ooor::OpenObjectResource.class_name_from_model_key(@model_name)
+      @model ||= ooor_prefix.const_get(model_ooor)
     end
 
     def fields
@@ -29,10 +24,6 @@ module OerpOerp
         @fields[field.name] = specs
       end
       @fields
-    end
-
-    def disconnect
-
     end
 
     private

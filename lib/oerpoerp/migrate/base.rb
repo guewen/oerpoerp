@@ -83,13 +83,10 @@ module OerpOerp
         lines_actions.run(from)
       end
       @after_action.call unless OPTIONS[:simulation]
-      @source.disconnect
     end
 
     def run
       puts "Starting import of #{@name} migration file from #{@source_model} model to #{@target_model} model"
-      @source.connect
-      @target.connect
       introspect_fields
       puts "Starting lines import"
       run_import
