@@ -1,6 +1,6 @@
 module OerpOerp
 
-  require File.dirname(__FILE__) + '/modules/ooor_common'
+  require File.dirname(__FILE__) + '/ooor_common'
 
   class OoorSource < ProxySource
     include OoorCommon
