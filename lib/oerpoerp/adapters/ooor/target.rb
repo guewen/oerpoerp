@@ -2,7 +2,7 @@ module OerpOerp
 
   require File.dirname(__FILE__) + '/ooor_common'
 
-  class OoorTarget < ProxyTarget
+  class OoorTarget < TargetBase
     include OoorCommon
 
     register_proxy :ooor

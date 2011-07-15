@@ -59,7 +59,7 @@ module OerpOerp
 
   end
 
-  class ProxySource
+  class SourceBase
     include AdaptersFactory
     include ConnectionFrom
     @proxy_classes = []
@@ -69,7 +69,7 @@ module OerpOerp
 
   end
 
-  class ProxyTarget
+  class TargetBase
     include AdaptersFactory
     include ConnectionFrom
     @proxy_classes = []
@@ -82,26 +82,4 @@ module OerpOerp
     end
 
   end
-
-  class Connection
-    include AdaptersFactory
-    @proxy_classes = []
-
-    class << self
-      attr_accessor :connection_instances
-
-      def get(from)
-        @connection_instances ||= {}
-        return @connection_instances[from] if @connection_instances[from]
-        @connection_instances[from] = self.new(from)
-        @connection_instances[from]
-      end
-    end
-
-    def initialize(from)
-       raise NotImplementedError('Not implemented at abstract level')
-    end
-
-  end
-
 end

@@ -17,8 +17,8 @@ module OerpOerp
       @before_action = Proc.new {}
       @after_action = Proc.new {}
 
-      @source = ProxySource.proxy_for(@source_method)
-      @target = ProxyTarget.proxy_for(@target_method)
+      @source = SourceBase.proxy_for(@source_method)
+      @target = TargetBase.proxy_for(@target_method)
 
       @fields_definition = FieldsAnalyzer.new
 
@@ -152,11 +152,11 @@ module OerpOerp
     end
 
     def run_setters(source_line)
-      @setters.each do |to_field, setter|
+      @setters.each do |target_field, setter|
         if setter
-          @line[to_field] = setter.call(source_line, @line)
+          @line[target_field] = setter.call(source_line, @line)
         else
-          puts "No setter defined for field #{to_field}"
+          puts "No setter defined for field #{target_field}"
         end
       end
     end
@@ -190,14 +190,14 @@ module OerpOerp
       end
     end
 
-    def set_value(to_field, &block)
+    def set_value(target_field, &block)
       if block_given?
-        @setters[to_field] = block
+        @setters[target_field] = block
       else
         # according to field definition, call the good method (copy simple value / many2one...)
-        field_definition = migration.fields_definition.matching_fields[to_field]
-        raise "No #{to_field} found in the fields introspection" unless field_definition
-        @setters[to_field] = self.send "set_#{field_definition[:ttype]}", to_field
+        field_definition = migration.fields_definition.matching_fields[target_field]
+        raise "No #{target_field} found in the fields introspection" unless field_definition
+        @setters[target_field] = self.send "set_#{field_definition[:ttype]}", target_field
       end
     end
 
@@ -212,53 +212,41 @@ module OerpOerp
       end
     end
 
-    def set_integer(to_field)
+    def set_simple(target_field)
       # must return a block
-      Proc.new { |source_line, target_line| source_line.send(to_field).to_i }
-    end
-    alias_method  :set_integer_big, :set_integer
-
-    def set_float(to_field)
-      # must return a block
-
-      Proc.new { |source_line, target_line| source_line.send(to_field).to_f }
+      Proc.new { |source_line, target_line| source_line.send(target_field).to_i }
     end
 
-    def set_char(to_field)
-      # must return a block
-      Proc.new { |source_line, target_line| source_line.send(to_field).to_s }
-    end
-    alias_method :set_text, :set_char
-    alias_method :set_selection, :set_char
+    alias_method :set_integer, :set_simple
+    alias_method :set_integer_big, :set_simple
+    alias_method :set_float, :set_simple
+    alias_method :set_char, :set_simple
+    alias_method :set_text, :set_simple
+    alias_method :set_selection, :set_simple
+    alias_method :set_boolean, :set_simple
+    alias_method :set_date, :set_simple
+    alias_method :set_datetime, :set_simple
 
-    def set_boolean(to_field)
-      # must return a block
-      Proc.new { |source_line, target_line| source_line.send(to_field) }
-    end
-
-    def set_one2many(to_field)
-      # skip !
+    def set_one2many(target_field)
+      # skip! we assign many2one in a normal case
     end
 
-    def set_many2one(to_field)
+    def set_many2one(target_field)
       # must return a block
       # get relation id using the relation of fields introspection and the
       # class used for the references
-      # fixme: return right relation instead of 1...
+      # create a table to store old and new id (module oerpoerp in oerp)
+      # TODO
       Proc.new { |source_line, target_line| 1 }
     end
 
-    def set_many2many(to_field)
+    def set_many2many(target_field)
       # must return a block
+      # TODO
     end
 
-    def set_datetime(to_field)
-      # must return a block
-      Proc.new { |source_line, target_line| source_line.send(to_field) }
-    end
-    alias_method :set_date, :set_datetime
-
-    def set_parent(to_field)
+    def set_parent(target_field)
+      # TODO
       # used for many2one on the same object
       # how to manage assignation to parents not already imported ?
       # create an array on MigrationBase and fill it with the ids to update ?
@@ -278,7 +266,7 @@ module OerpOerp
         puts Hirb::Helpers::Table.render [display_source_line.update('' => 'source'), display_line.update('' => 'target')], :description => false, :resize => false
         puts "\n"
       else
-        @target.save(@line)
+        target.save(@line)
       end
     end
 

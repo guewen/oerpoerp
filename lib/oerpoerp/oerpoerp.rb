@@ -5,19 +5,23 @@ require 'hirb'
 require 'hashery/orderedhash'
 require 'ooor'
 
-require File.dirname(__FILE__) + '/migrate/base'
-require File.dirname(__FILE__) + '/migrate/pooler'
-require File.dirname(__FILE__) + '/migrate/fields_analyzer'
+require File.dirname(__FILE__) + '/core_ext/basic_object'
+require File.dirname(__FILE__) + '/core'
+require File.dirname(__FILE__) + '/pooler'
+require File.dirname(__FILE__) + '/fields_analyzer'
 require File.dirname(__FILE__) + '/adapters/adapters'
 
 # load all adapters
 MODELS_PATH = File.dirname(__FILE__) + '/adapters/'
+
 Dir[File.join(MODELS_PATH, '**/*.rb')].each do |file|
   require File.join(File.dirname(file), File.basename(file, File.extname(file)))
 end
 
 
-# TODO implement options
+module OerpOerp
+
+  # TODO implement options
 OPTIONS = {
   :verbose => true,
   :simulation => true,
@@ -37,14 +41,10 @@ OPTIONS = {
     }
   }
 
-module OerpOerp
-
   VERSION = "0.1.0"
 
 
   r = MigrateBase.new
-  Pooler.get(:ooor, :source)
-  Pooler.get(:ooor, :target)
   r.initialize_from_file( ARGV[0] )
   r.run
 
