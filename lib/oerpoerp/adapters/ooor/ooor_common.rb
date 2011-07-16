@@ -4,8 +4,7 @@ module OerpOerp
     attr_reader :ooor_prefix, :oerp
 
     def oerp
-      @oerp = Pooler.get(self.class.proxy, self.class.connection_from)
-      @oerp
+      @oerp ||= Pooler.get(self.class.proxy, self.class.connection_from)
     end
 
     def default_iterator
