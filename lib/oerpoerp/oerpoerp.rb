@@ -6,6 +6,7 @@ require 'hashery/orderedhash'
 require 'ooor'
 
 require File.dirname(__FILE__) + '/core_ext/basic_object'
+require File.dirname(__FILE__) + '/core_ext/hash'
 require File.dirname(__FILE__) + '/core'
 require File.dirname(__FILE__) + '/pooler'
 require File.dirname(__FILE__) + '/fields_analyzer'

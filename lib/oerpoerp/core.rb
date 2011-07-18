@@ -22,6 +22,8 @@ module OerpOerp
 
       @fields_definition = FieldsAnalyzer.new
 
+      @lines_block = Proc.new {}
+
       instance_eval(&block) if block
     end
 
@@ -55,11 +57,6 @@ module OerpOerp
       @target.model_name = model
     end
 
-    def source
-      # implement in modules (like SOURCE_OOOR::ProductProduct / SOURCE_DB[:product_product])
-      @source.model
-    end
-
     def set_source_iterator(&block)
       @source_iterator = block
     end
@@ -77,10 +74,11 @@ module OerpOerp
       @after_action = block
     end
 
-    def run_import
+    def do_operations
       @before_action.call unless OPTIONS[:simulation]
       source_iterator.call.each do |from|
-        lines_actions.run(from)
+        lines_actions = MigrateLineBase.new(self, from, &@lines_block)
+        lines_actions.migrate_line
       end
       @after_action.call unless OPTIONS[:simulation]
     end
@@ -89,18 +87,14 @@ module OerpOerp
       puts "Starting import of #{@name} migration file from #{@source_model} model to #{@target_model} model"
       introspect_fields
       puts "Starting lines import"
-      run_import
+      do_operations
     end
 
-    def do_lines_actions(&block)
-      @lines_actions = MigrateLineBase.new(self, &block)
+    def lines_actions(&block)
+      @lines_block = block
     end
 
     private
-
-    def lines_actions
-      @lines_actions ||= MigrateLineBase.new(self)
-    end
 
     def introspect_fields
       @fields_definition.compare(@source.fields, @target.fields)
@@ -114,12 +108,12 @@ module OerpOerp
 
     attr_reader :migration, :source_line
 
-    def initialize(migration, &block)
+    def initialize(migration, source_line, &block)
       @migration = migration
-      @source_line = {}
+      @source_line = source_line
       @before_action = Proc.new {}
       @before_save_action = Proc.new {}
-      @setters = OrderedHash.new
+      @setters = OrderedHash.new  # ordered hash to keep the order defined in the migration files (one could depends of another)
       @after_action = Proc.new {}
 
       # auto migrate options
@@ -141,8 +135,7 @@ module OerpOerp
       @migration.target
     end
 
-    def run(source_line)
-      @source_line = source_line
+    def migrate_line
       @before_action.call(source_line, @line) unless OPTIONS[:simulation]
       create_default_setters
       run_setters(source_line)
@@ -154,7 +147,7 @@ module OerpOerp
     def run_setters(source_line)
       @setters.each do |target_field, setter|
         if setter
-          @line[target_field] = setter.call(source_line, @line)
+          @line[target_field.to_sym] = setter.call(source_line, @line)
         else
           puts "No setter defined for field #{target_field}"
         end
@@ -191,13 +184,14 @@ module OerpOerp
     end
 
     def set_value(target_field, &block)
+      field_sym = target_field.to_sym
       if block_given?
-        @setters[target_field] = block
+        @setters[field_sym] = block
       else
         # according to field definition, call the good method (copy simple value / many2one...)
         field_definition = migration.fields_definition.matching_fields[target_field]
         raise "No #{target_field} found in the fields introspection" unless field_definition
-        @setters[target_field] = self.send "set_#{field_definition[:ttype]}", target_field
+        @setters[field_sym] = self.send "set_#{field_definition[:ttype]}", field_sym
       end
     end
 
@@ -214,7 +208,7 @@ module OerpOerp
 
     def set_simple(target_field)
       # must return a block
-      Proc.new { |source_line, target_line| source_line.send(target_field).to_i }
+      Proc.new { |source_line, target_line| source_line.send(target_field) }
     end
 
     alias_method :set_integer, :set_simple
@@ -226,6 +220,16 @@ module OerpOerp
     alias_method :set_boolean, :set_simple
     alias_method :set_date, :set_simple
     alias_method :set_datetime, :set_simple
+    alias_method :set_binary, :set_simple
+
+    def set_simple(target_field)
+      # must return a block
+      raise NotImplementedError
+    end
+
+    def set_one2one(target_field)
+      raise NotImplementedError
+    end
 
     def set_one2many(target_field)
       # skip! we assign many2one in a normal case
@@ -255,14 +259,17 @@ module OerpOerp
     end
 
     def save
+
       if OPTIONS[:simulation]
         # pretty display
         # TODO replace puts by logs
         # fixme : does not display cols existing in line and not in source_line
         # fixme move stuff relative to ooor in adapter
         display_source_line = @source_line.attributes.merge(@source_line.associations)
+        display_source_line.symbolize_keys!
         display_line = @line.dup
         @line.keys.each { |key| display_source_line[key] = nil unless display_source_line.keys.include? key}
+
         puts Hirb::Helpers::Table.render [display_source_line.update('' => 'source'), display_line.update('' => 'target')], :description => false, :resize => false
         puts "\n"
       else

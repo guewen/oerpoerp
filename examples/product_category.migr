@@ -6,8 +6,23 @@ target_method :ooor
 source_model "product.category"
 target_model "product.category"
 
+# TODO
+# preload(:foo_ids) do
+#   mapping = {}
+#   source.models['bar'].find(:all, :fields => ['id', 'f_key']).map { |x| mapping[x.f_key] = x.id }
+#   mapping
+# end
+
 before do
   puts "before"
+end
+
+lines_actions do
+
+  set_value :x_my_new_field_on_source do |source_line, target_line|
+    source_line.id * 10
+  end
+
 end
 
 after do

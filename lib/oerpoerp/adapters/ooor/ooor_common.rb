@@ -26,7 +26,7 @@ module OerpOerp
 
         @fields[field.name] = specs
       end
-      @fields
+      @fields.symbolize_keys
     end
 
   end
