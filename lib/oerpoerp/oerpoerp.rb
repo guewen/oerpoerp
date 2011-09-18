@@ -7,8 +7,11 @@ require 'ooor'
 
 require File.dirname(__FILE__) + '/core_ext/basic_object'
 require File.dirname(__FILE__) + '/core_ext/hash'
+require File.dirname(__FILE__) + '/core_ext/module'
 require File.dirname(__FILE__) + '/core'
 require File.dirname(__FILE__) + '/pooler'
+require File.dirname(__FILE__) + '/openerp_field'
+require File.dirname(__FILE__) + '/openerp_model'
 require File.dirname(__FILE__) + '/fields_analyzer'
 require File.dirname(__FILE__) + '/adapters/adapters'
 
@@ -43,7 +46,6 @@ OPTIONS = {
   }
 
   VERSION = "0.1.0"
-
 
   r = MigrateBase.new
   r.initialize_from_file( ARGV[0] )

@@ -1,6 +1,6 @@
 module OerpOerp
 
-  class FieldsAnalyzer
+  class FieldsAnalyzer    # TODO: rename to ModelComparator? take 2 models
     attr_reader :matching_fields, :source_only_fields, :target_only_fields, :conflicting_fields
 
     def initialize

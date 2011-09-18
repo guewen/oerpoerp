@@ -12,6 +12,7 @@ target_model "product.category"
 #   source.models['bar'].find(:all, :fields => ['id', 'f_key']).map { |x| mapping[x.f_key] = x.id }
 #   mapping
 # end
+# end
 
 before do
   puts "before"
