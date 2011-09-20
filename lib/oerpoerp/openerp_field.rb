@@ -2,7 +2,7 @@ module OerpOerp
 
   class OpenERPField
 
-    attr_writer :name, :ttype, :relation
+    attr_writer_as_symbol :name, :ttype, :relation
     attr_reader :name, :ttype, :relation
 
     def initialize(name, ttype, relation)

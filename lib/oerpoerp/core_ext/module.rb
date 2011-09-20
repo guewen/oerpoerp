@@ -1,5 +1,5 @@
-module OerpOerp
-  class Module
+#module OerpOerp
+  class Class
 
     def attr_writer_as_symbol(*syms)
       syms.each do | sym |
@@ -13,4 +13,4 @@ module OerpOerp
       nil
     end
   end
-end
+#end

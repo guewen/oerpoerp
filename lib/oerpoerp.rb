@@ -5,23 +5,14 @@ require 'hirb'
 require 'hashery/orderedhash'
 require 'ooor'
 
-require File.dirname(__FILE__) + '/core_ext/basic_object'
-require File.dirname(__FILE__) + '/core_ext/hash'
-require File.dirname(__FILE__) + '/core_ext/module'
-require File.dirname(__FILE__) + '/core'
-require File.dirname(__FILE__) + '/pooler'
-require File.dirname(__FILE__) + '/openerp_field'
-require File.dirname(__FILE__) + '/openerp_model'
-require File.dirname(__FILE__) + '/fields_analyzer'
-require File.dirname(__FILE__) + '/adapters/adapters'
-
-# load all adapters
-MODELS_PATH = File.dirname(__FILE__) + '/adapters/'
-
-Dir[File.join(MODELS_PATH, '**/*.rb')].each do |file|
-  require File.join(File.dirname(file), File.basename(file, File.extname(file)))
-end
-
+require 'oerpoerp/core_ext'
+require 'oerpoerp/version'
+require 'oerpoerp/core'
+require 'oerpoerp/fields_analyzer'
+require 'oerpoerp/pooler'
+require 'oerpoerp/openerp_field'
+require 'oerpoerp/openerp_model'
+require 'oerpoerp/adapters'
 
 module OerpOerp
 
