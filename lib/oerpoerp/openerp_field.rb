@@ -3,12 +3,15 @@ module OerpOerp
   class OpenERPField
 
     attr_writer_as_symbol :name, :ttype, :relation
-    attr_reader :name, :ttype, :relation
+    attr_reader :name, :ttype, :relation, :model
 
-    def initialize(name, ttype, relation)
-      self.name = name
-      self.ttype = ttype
-      self.relation = relation
+    def initialize(model, attributes={})
+      @model = model
+      attributes.each do |key, value|
+        method_key = "#{key}=".to_sym
+        next unless self.respond_to? method_key
+        self.send(method_key, value)
+      end
     end
 
     def ==(other)
@@ -21,6 +24,10 @@ module OerpOerp
       end
 
       equality_attributes.reject { |attr| self.send(attr) == other.send(attr)}.empty?
+    end
+
+    def to_s
+      "#{@model.table_name}.#{@name}"
     end
 
   end

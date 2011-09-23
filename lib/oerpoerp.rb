@@ -36,7 +36,6 @@ OPTIONS = {
     }
   }
 
-  VERSION = "0.1.0"
 
   r = MigrateBase.new
   r.initialize_from_file( ARGV[0] )

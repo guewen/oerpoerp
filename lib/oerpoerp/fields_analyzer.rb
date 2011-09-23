@@ -1,13 +1,14 @@
 module OerpOerp
 
-  class FieldsAnalyzer    # TODO: rename to ModelComparator? take 2 models
+  class ModelMatch
     attr_reader :matching_fields, :source_only_fields, :target_only_fields, :conflicting_fields
 
-    def initialize
+    def initialize(source_model, target_model)
       @matching_fields = {}
       @source_only_fields = {}
       @target_only_fields = {}
       @conflicting_fields = {}
+      compare(source_model, target_model)
     end
 
     # display a nice (not for the moment) output with all infos on fields
@@ -76,6 +77,8 @@ module OerpOerp
 
     def one_side_fields(left_fields, right_fields)
       only_left = {}
+      pp left_fields
+      pp right_fields
       (left_fields.keys - right_fields.keys).each { |field| only_left[field] = left_fields[field] }
       only_left
     end

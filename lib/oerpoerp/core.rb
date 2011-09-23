@@ -2,7 +2,7 @@ module OerpOerp
   class MigrateBase
 
     attr_accessor :name, :depends
-    attr_reader :fields_definition, :source, :target
+    attr_reader :models_matching, :source, :target
 
 
     def initialize(&block)
@@ -19,8 +19,6 @@ module OerpOerp
 
       @source = SourceBase.proxy_for(@source_method)
       @target = TargetBase.proxy_for(@target_method)
-
-      @fields_definition = FieldsAnalyzer.new
 
       @lines_block = Proc.new {}
 
@@ -85,7 +83,7 @@ module OerpOerp
 
     def run
       puts "Starting import of #{@name} migration file from #{@source_model} model to #{@target_model} model"
-      introspect_fields
+      introspect_models
       puts "Starting lines import"
       do_operations
     end
@@ -96,9 +94,9 @@ module OerpOerp
 
     private
 
-    def introspect_fields
-      @fields_definition.compare(@source.fields, @target.fields)
-      @fields_definition.display if OPTIONS[:verbose]
+    def introspect_models
+      @models_matching = OerpOerp::ModelMatch.new(source.model_definition, target.model_definition)
+      @models_matching.display if OPTIONS[:verbose]
     end
 
   end
@@ -189,7 +187,7 @@ module OerpOerp
         @setters[field_sym] = block
       else
         # according to field definition, call the good method (copy simple value / many2one...)
-        field_definition = migration.fields_definition.matching_fields[target_field]
+        field_definition = migration.models_matching.matching_fields[target_field]
         raise "No #{target_field} found in the fields introspection" unless field_definition
         @setters[field_sym] = self.send "set_#{field_definition[:ttype]}", field_sym
       end
@@ -198,7 +196,7 @@ module OerpOerp
     private
 
     def create_default_setters
-      migration.fields_definition.matching_fields.keys.each do |field|
+      migration.models_matching.matching_fields.keys.each do |field|
         next if @skip_fields && @skip_fields.include?(field)
         next if @only_fields && !@only_fields.include?(field)
         next if @setters.keys.include?(field)

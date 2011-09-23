@@ -15,18 +15,11 @@ module OerpOerp
       @model ||= oerp[@model_name]
     end
 
-    def fields
-      return @fields if defined? @fields
-      @fields = {}
-      oerp['ir.model.fields'].find(:all, :domain => [['model', '=', @model_name]],
-                                   :fields => ['ttype', 'relation', 'name']).each do |field|
-        specs = {}
-        specs[:ttype] = field.ttype
-        specs[:relation] = field.relation if ['many2one', 'one2many', 'many2many'].include? field.ttype
-
-        @fields[field.name] = specs
-      end
-      @fields.symbolize_keys
+    def get_fields
+      ir_model_fields = oerp['ir.model.fields'].find(:all,
+                                                     :domain => [['model', '=', @model_name]],
+                                                     :fields => ['ttype', 'relation', 'name'])
+      ir_model_fields.map { |fields| fields.attributes.symbolize_keys }
     end
 
   end

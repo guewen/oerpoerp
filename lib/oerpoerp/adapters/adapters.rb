@@ -59,9 +59,22 @@ module OerpOerp
 
   end
 
+  module SourceTargetCommon
+
+    def model_definition
+      return @model_definition if defined? @model_definition
+      @model_definition = OerpOerp::OpenERPModel.new(@model_name)
+      get_fields.each do |field|
+        @model_definition << field
+      end
+      @model_definition
+    end
+  end
+
   class SourceBase
     include AdaptersFactory
     include ConnectionFrom
+    include SourceTargetCommon
     @proxy_classes = []
 
     attr_accessor :model_name
@@ -72,6 +85,7 @@ module OerpOerp
   class TargetBase
     include AdaptersFactory
     include ConnectionFrom
+    include SourceTargetCommon
     @proxy_classes = []
 
     attr_accessor :model_name
