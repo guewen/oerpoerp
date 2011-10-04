@@ -1,3 +1,6 @@
+oerpoerp_path = File.expand_path('../../../oerpoerp/lib', __FILE__)
+$:.unshift(oerpoerp_path) if File.directory?(oerpoerp_path) && !$:.include?(oerpoerp_path)
+
 require 'rubygems'
 require 'pp'
 require 'colorize'
@@ -7,7 +10,9 @@ require 'ooor'
 
 require 'oerpoerp/core_ext'
 require 'oerpoerp/version'
+require 'oerpoerp/migration_dsl'
 require 'oerpoerp/core'
+require 'oerpoerp/actions'
 require 'oerpoerp/fields_analyzer'
 require 'oerpoerp/pooler'
 require 'oerpoerp/openerp_field'
@@ -16,7 +21,7 @@ require 'oerpoerp/adapters'
 
 module OerpOerp
 
-  # TODO implement options
+  # TODO implement options in a global migration file
 OPTIONS = {
   :verbose => true,
   :simulation => true,
@@ -37,7 +42,7 @@ OPTIONS = {
   }
 
 
-  r = MigrateBase.new
+  r = MigrationCore.new
   r.initialize_from_file( ARGV[0] )
   r.run
 

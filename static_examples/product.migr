@@ -1,0 +1,65 @@
+name :product
+depends [:product_category]
+
+source_method :ooor
+target_method :ooor
+
+source_model "product.product"
+target_model "product.product"
+
+before do
+  puts "before"
+end
+
+#set_source_iterator do
+##  source.find...
+#  [
+#  {:id => 1,
+#   :name => 'cauliflower',
+#   :price => 3.0,
+#   :category => 1},
+#  {:id => 2,
+#   :name => 'Mango',
+#   :price => 5.0,
+#  :category => 2},
+#  {:id => 2,
+#   :name => 'Carrot',
+#   :price => 0.5,
+#   :category => 1}
+#  ]
+#end
+
+# TODO
+# preload(:foo_ids) do
+#   mapping = {}
+#   source.models['bar'].find(:all, :fields => ['id', 'f_key']).map { |x| mapping[x.f_key] = x.id }
+#   mapping
+# end
+
+after do
+  puts "after"
+end
+
+lines_actions do
+
+#  auto_migrate_fields false
+#  auto_migrate_fields :only => [:name]
+#  auto_migrate_fields :exclude => [:name]
+
+  before do |source_line, target_line|
+    puts "line before "
+  end
+
+  set_value(:price) do |source_line, target_line|
+    source_line.price * 10
+  end
+
+  set_value(:foo) do |source_line, target_line|
+    'bar'
+  end
+
+  after do |source_line, target_line|
+    puts "line after"
+  end
+
+end

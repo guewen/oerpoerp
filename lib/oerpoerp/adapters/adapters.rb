@@ -60,6 +60,10 @@ module OerpOerp
   end
 
   module SourceTargetCommon
+    
+    attr_accessor :name
+    attr_accessor :model_name
+    attr_reader :model
 
     def model_definition
       return @model_definition if defined? @model_definition
@@ -69,6 +73,15 @@ module OerpOerp
       end
       @model_definition
     end
+
+    def initialize(&block)
+      yield self if block_given?
+    end
+
+    def model(name)
+      @name = name
+    end
+
   end
 
   class SourceBase
@@ -77,8 +90,23 @@ module OerpOerp
     include SourceTargetCommon
     @proxy_classes = []
 
-    attr_accessor :model_name
-    attr_reader :model
+    attr_reader :data_iterator
+
+    def default_iterator
+      # must be a proc containing a object responding to #each
+      Proc.new { [] }
+    end
+
+    def lines
+      block = @data_iterator || default_iterator
+      block.call
+    end
+
+    # DSL Methods
+
+    def iterate_on(&block)
+      @data_iterator = block
+    end
 
   end
 
@@ -88,11 +116,12 @@ module OerpOerp
     include SourceTargetCommon
     @proxy_classes = []
 
-    attr_accessor :model_name
-    attr_reader :model
+    def insert(data_record)
 
-    def save(data_record)
+    end
 
+    def update(id, data_record)
+      
     end
 
   end
