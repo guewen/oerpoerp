@@ -9,7 +9,11 @@ module OerpOerp
     end
 
     def default_iterator
-      Proc.new { raise "In static mode, define an iterator with DSL method : set_source_iterator ( set_source_iterator do [1,2,3] end)" }
+      Proc.new { raise "In static mode, define an iterator with DSL method #data, like: data do [{:id => 1}, {:id => 2}, {:id => 3}] end)" }
+    end
+
+    def fields(&fields)
+      @static_fields = fields.call
     end
 
     #def model
@@ -17,7 +21,8 @@ module OerpOerp
     #end
 
     def get_fields
-      static_fields.map { |fields| fields.attributes.symbolize_keys }
+      raise "Missing static structure of fields in static mode! Define it with DSL method #fields, like: fields do [{:name => 'id', :ttype => 'integer'}] end" if @static_fields.nil?
+      @static_fields.map { |fields| fields.symbolize_keys }
     end
 
   end

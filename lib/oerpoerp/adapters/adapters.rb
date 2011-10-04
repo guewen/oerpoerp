@@ -4,11 +4,11 @@ module OerpOerp
     module ClassMethods
       attr_reader :proxy_classes, :proxy
 
-      def proxy_for(method, *args)
+      def proxy_for(method, *args, &block)
         proxy_class = self.proxy_classes.find do |klass|
           klass.proxy_for?(method)
         end
-        return proxy_class.new(*args) if proxy_class
+        return proxy_class.new(*args, &block) if proxy_class
         nil
       end
 
@@ -65,17 +65,18 @@ module OerpOerp
     attr_accessor :model_name
     attr_reader :model
 
-    def model_definition
-      return @model_definition if defined? @model_definition
-      @model_definition = OerpOerp::OpenERPModel.new(@model_name)
+    def model_structure
+      return @model_structure if defined? @model_structure
+      @model_structure = OerpOerp::OpenERPModel.new(@model_name)
       get_fields.each do |field|
-        @model_definition << field
+        @model_structure << field
       end
-      @model_definition
+      @model_structure
     end
 
-    def initialize(&block)
-      yield self if block_given?
+    def initialize(*args, &block)
+      # TODO use connection
+      instance_eval(&block) if block
     end
 
     def model(name)
@@ -104,7 +105,7 @@ module OerpOerp
 
     # DSL Methods
 
-    def iterate_on(&block)
+    def data(&block)
       @data_iterator = block
     end
 

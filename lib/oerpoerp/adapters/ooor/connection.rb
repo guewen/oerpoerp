@@ -3,7 +3,7 @@ module OerpOerp
   class OoorProxy < BasicObject
     attr_reader :oerp
 
-    Pooler.register_class_proxy(:ooor, OoorProxy)
+#    OerpOerp::Pooler.register_class_proxy(:ooor, OerpOerp::OoorProxy)
 
     def initialize(from)
       @adapter_options = OerpOerp::OPTIONS[:ooor]

@@ -14,7 +14,7 @@ module OerpOerp
     end
 
     def depends(dependencies)
-      raise "Dependencies must be an array of symbols (#{dependencies})" unless depends.is_a? Array || !dependencies.filter{|d| !d.is_a?(Symbol)}.empty?
+      raise "Dependencies must be an array of symbols (#{dependencies})" unless dependencies.is_a? Array || !dependencies.filter{|d| !d.is_a?(Symbol)}.empty?
       @dependencies = dependencies
     end
 

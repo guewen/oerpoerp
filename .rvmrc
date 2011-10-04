@@ -1,1 +1,1 @@
-rvm --create use default@oerp2oerp > /dev/null
+rvm --create use default@oerpoerp > /dev/null

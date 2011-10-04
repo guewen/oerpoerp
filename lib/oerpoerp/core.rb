@@ -34,20 +34,20 @@ module OerpOerp
     end
 
     def source
-      return @source if @source.defined?
+      return @source unless @source.nil?
       method = @source_configuration[0][:method]
       destination = @source_configuration[0][:connection]
       block = @source_configuration[1]
-      @source = @source_class.new(method, destination, block)
+      @source = @source_class.proxy_for(method, destination, &block)
       @source
     end
 
     def target
-      return @target if @target.defined?
+      return @target unless @target.nil?
       method = @target_configuration[0][:method]
       destination = @target_configuration[0][:connection]
       block = @target_configuration[1]
-      @target = @target_class.new(method, destination, block)
+      @target = @target_class.proxy_for(method, destination, &block)
       @target
     end
 
@@ -76,7 +76,7 @@ module OerpOerp
     private
 
     def introspect_models
-      @models_matching = OerpOerp::ModelMatch.new(source.model_definition, target.model_definition)
+      @models_matching = OerpOerp::ModelMatch.new(source.model_structure, target.model_structure)
       @models_matching.display if OPTIONS[:verbose]
     end
 

@@ -1,33 +1,22 @@
 name :product
 depends [:product_category]
 
-source_method :ooor
-target_method :ooor
-
-source_model "product.product"
-target_model "product.product"
-
 before do
   puts "before"
 end
 
-#set_source_iterator do
-##  source.find...
-#  [
-#  {:id => 1,
-#   :name => 'cauliflower',
-#   :price => 3.0,
-#   :category => 1},
-#  {:id => 2,
-#   :name => 'Mango',
-#   :price => 5.0,
-#  :category => 2},
-#  {:id => 2,
-#   :name => 'Carrot',
-#   :price => 0.5,
-#   :category => 1}
-#  ]
-#end
+source_with :method => :ooor, :connection => :conn1 do
+  model "product.product"
+
+  data do
+    source.model.all
+  end
+
+end
+
+target_with :method => :ooor, :connection => :conn2 do
+  model "product.product"
+end
 
 # TODO
 # preload(:foo_ids) do
