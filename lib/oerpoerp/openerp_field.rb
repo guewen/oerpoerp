@@ -2,6 +2,9 @@ module OerpOerp
 
   class OpenERPField
 
+    # TODO ?
+    # include Comparable
+
     attr_writer_as_symbol :name, :ttype, :relation
     attr_reader :name, :ttype, :relation, :model
 
@@ -23,6 +26,18 @@ module OerpOerp
       end
 
       equality_attributes.reject { |attr| self.send(attr) == other.send(attr)}.empty?
+    end
+
+    def conflict(other_field)
+      return false if other_field.equal?(self)
+      return false if self == other_field
+      return false if self.name != other_field.name
+      
+      [:ttype, :relation].each do |attr|
+        return true unless other_field.respond_to? attr
+        return true if self.send(attr) != other_field.send(attr)
+      end
+      false
     end
 
   end

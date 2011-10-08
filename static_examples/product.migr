@@ -9,6 +9,9 @@ source_with :method => :static, :connection => :conn1 do
       {:name => 'name', :ttype => 'char'},
       {:name => 'price', :ttype => 'float'},
       {:name => 'category', :ttype => 'many2one', :relation => 'product.category'},
+      {:name => 'source_only_field', :ttype => 'integer'},
+      {:name => 'conflict_field', :ttype => 'integer'},
+      {:name => 'relation_conflict_field', :ttype => 'many2one', :relation => 'product.uom'},
     ]
   end
 
@@ -39,6 +42,9 @@ target_with :method => :static, :connection => :conn2 do
       {:name => 'name', :ttype => 'char'},
       {:name => 'price', :ttype => 'float'},
       {:name => 'category', :ttype => 'many2one', :relation => 'product.category'},
+      {:name => 'target_only_field', :ttype => 'integer'},
+      {:name => 'conflict_field', :ttype => 'char'},
+      {:name => 'relation_conflict_field', :ttype => 'many2one', :relation => 'product.supplier'},
     ]
   end
 end

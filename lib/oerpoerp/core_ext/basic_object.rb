@@ -17,6 +17,6 @@ module OerpOerp
         ((private_instance_methods + instance_methods) - KEEP_METHODS).each{|m| undef_method(m)}
       end
       remove_methods!
-    end
+    end 
   end
 end

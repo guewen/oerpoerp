@@ -61,7 +61,6 @@ module OerpOerp
 
   module SourceTargetCommon
     
-    attr_accessor :name
     attr_accessor :model_name
     attr_reader :model
 
@@ -80,7 +79,7 @@ module OerpOerp
     end
 
     def model(name)
-      @name = name
+      @model_name = name
     end
 
   end
