@@ -6,7 +6,6 @@ module OerpOerp
     include OerpOerp::StaticCommon
 
     register_proxy :static
-    connect_from :source
 
   end
 

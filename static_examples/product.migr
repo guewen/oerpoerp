@@ -2,7 +2,7 @@ name :product
 depends [:product_category]
 
 source_with :method => :static, :connection => :conn1 do
-  model "product.product"
+  base_model "product.product"
   fields do
     [
       {:name => 'id', :ttype => 'integer'},
@@ -33,8 +33,8 @@ source_with :method => :static, :connection => :conn1 do
   end
 end
 
-target_with :method => :static, :connection => :conn2 do
-  model "product.product"
+target_with :method => :static do
+  base_model "product.product"
 
   fields do
     [

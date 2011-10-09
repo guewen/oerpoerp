@@ -30,31 +30,7 @@ module OerpOerp
     end
 
     def adapter_options
-      @adapter_options ||= OPTIONS[self.class.proxy]
-    end
-
-  end
-
-  module ConnectionFrom
-
-    module ClassMethods
-      attr_reader :connection_from
-
-      def connect_from(from)
-        @connection_from = from
-      end
-
-      def connect_from?(from)
-        @connection_from == from
-      end
-
-      def inherited(subclass)
-        self.proxy_classes << subclass
-      end
-    end
-
-    def self.included(host_class)
-      host_class.extend(ClassMethods)
+      @adapter_options ||= OerpOerp::OPTIONS[self.class.proxy]
     end
 
   end
@@ -62,7 +38,7 @@ module OerpOerp
   module SourceTargetCommon
     
     attr_accessor :model_name
-    attr_reader :model
+    attr_reader :model, :connection_name
 
     def model_structure
       return @model_structure if defined? @model_structure
@@ -74,11 +50,12 @@ module OerpOerp
     end
 
     def initialize(*args, &block)
-      # TODO use connection
+      # todo improve
+      @connection_name = args.last[:connection]
       instance_eval(&block) if block
     end
 
-    def model(name)
+    def base_model(name)
       @model_name = name
     end
 
@@ -86,11 +63,15 @@ module OerpOerp
 
   class SourceBase
     include AdaptersFactory
-    include ConnectionFrom
     include SourceTargetCommon
     @proxy_classes = []
 
     attr_reader :data_iterator
+
+    def connection_name
+      @connection_name ||= OerpOerp::OPTIONS[self.class.proxy][:default_source_connection]
+      @connection_name
+    end
 
     def default_iterator
       # must be a proc containing a object responding to #each
@@ -112,9 +93,13 @@ module OerpOerp
 
   class TargetBase
     include AdaptersFactory
-    include ConnectionFrom
     include SourceTargetCommon
     @proxy_classes = []
+
+    def connection_name
+      @connection_name ||= OerpOerp::OPTIONS[self.class.proxy][:default_target_connection]
+      @connection_name
+    end
 
     def insert(data_record)
 

@@ -18,11 +18,11 @@ module OerpOerp
         @proxy[method] if @proxy
       end
 
-      def get(method, from)
+      def get(method, connection_name)
         @connection_instances ||= {}
-        return @connection_instances[from] if @connection_instances[from]
-        @connection_instances[from] = self.proxy_for(method, from)
-        @connection_instances[from]
+        return @connection_instances[connection_name] if @connection_instances[connection_name]
+        @connection_instances[connection_name] = self.proxy_for(method, connection_name)
+        @connection_instances[connection_name]
       end
     end
   end

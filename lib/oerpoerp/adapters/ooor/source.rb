@@ -6,7 +6,6 @@ module OerpOerp
     include OoorCommon
 
     register_proxy :ooor
-    connect_from :source
 
   end
 

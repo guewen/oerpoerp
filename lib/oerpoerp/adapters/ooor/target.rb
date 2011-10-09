@@ -6,7 +6,6 @@ module OerpOerp
     include OoorCommon
 
     register_proxy :ooor
-    connect_from :target
 
     def save(data_record)
       data_record ||= {}

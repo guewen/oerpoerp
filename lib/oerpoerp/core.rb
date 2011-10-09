@@ -35,19 +35,19 @@ module OerpOerp
 
     def source
       return @source unless @source.nil?
-      method = @source_configuration[0][:method]
-      destination = @source_configuration[0][:connection]
+      conf = @source_configuration[0].dup
+      method = conf.delete(:method)
       block = @source_configuration[1]
-      @source = @source_class.proxy_for(method, destination, &block)
+      @source = @source_class.proxy_for(method, conf, &block)
       @source
     end
 
     def target
       return @target unless @target.nil?
-      method = @target_configuration[0][:method]
-      destination = @target_configuration[0][:connection]
+      conf = @target_configuration[0].dup
+      method = conf.delete(:method)
       block = @target_configuration[1]
-      @target = @target_class.proxy_for(method, destination, &block)
+      @target = @target_class.proxy_for(method, conf, &block)
       @target
     end
 

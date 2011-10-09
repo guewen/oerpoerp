@@ -21,22 +21,27 @@ require 'oerpoerp/adapters'
 
 module OerpOerp
 
-  # TODO implement options in a global migration file
+  # TODO implement options in a global migration file using DSL syntax or YAML ?
 OPTIONS = {
   :verbose => true,
   :simulation => true,
+
   :ooor => {
-      :source => {
-        :url => 'http://localhost:8069/xmlrpc',
-        :database => 'oerp_source',
-        :username => 'admin',
-        :password => 'admin'
-      },
-      :target => {
-        :url => 'http://localhost:8079/xmlrpc',
-        :database => 'oerp_target',
-        :username => 'admin',
-        :password => 'admin'
+      :default_source_connection => :conn1,
+      :default_target_connection => :conn2,
+      :connections => {
+        :conn1 => {
+          :url => 'http://localhost:8069/xmlrpc',
+          :database => 'oerp_source',
+          :username => 'admin',
+          :password => 'admin'
+        },
+        :conn2 => {
+          :url => 'http://localhost:8079/xmlrpc',
+          :database => 'oerp_target',
+          :username => 'admin',
+          :password => 'admin'
+        }
       }
     }
   }
