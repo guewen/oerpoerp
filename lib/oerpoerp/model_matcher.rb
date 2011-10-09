@@ -55,6 +55,11 @@ module OerpOerp
       puts "\n"
     end
 
+    def field(name)
+      (@matching_fields + @conflicting_fields + @source_only_fields + target_only_fields)
+        .select {|field| field.name == name}.first
+    end
+
     private
 
     def compare(source_model, target_model)

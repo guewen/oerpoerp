@@ -2,13 +2,16 @@ module OerpOerp
   class MigrationActions
 
     attr_accessor :migration_name, :dependencies, :before_action, :before_save_action, :after_action, :setters, :migration_source, :migration_target
+    attr_reader :migration
 
-    def initialize(&block)
-      #@source_line = source_line
-      #@before_action = Proc.new {}
-      #@before_save_action = Proc.new {}
+    def initialize(migration, &block)
+      @migration = migration
+
       @setters = OrderedHash.new  # ordered hash to keep the order defined in the migration files (one could depends of another)
-      @after_action = Proc.new {}
+
+      # used in migration when some action can not be executed (for instance when a line must be assigned to a parent
+      # not already created) we add a proc per action to execute at the very end of the model migration
+      @postponed_actions = []
 
       # auto migrate options
       @only_fields = false
@@ -19,20 +22,28 @@ module OerpOerp
       instance_eval(&block) if block
     end
 
+    def migrate_lines(lines)
+      lines.each { |line| migrate_line(line) }
+      
+      @postponed_actions.each do |action|
+        action.call
+      end
+    end
+
     def migrate_line(source_line)
       line = {}
-      @before_action.call(source_line, line) unless OPTIONS[:simulation]
+      @before_action.call(source_line, line) unless @before_action or OPTIONS[:simulation]
       create_default_setters
       line = run_setters(source_line, line)
-      @before_save_action.call(source_line, line) unless OPTIONS[:simulation]
-      save
-      @after_action.call(source_line, line) unless OPTIONS[:simulation]
+      @before_save_action.call(source_line, line) unless @before_save_action or OPTIONS[:simulation]
+      save(source_line, line)
+      @after_action.call(source_line, line) unless @after_action or OPTIONS[:simulation]
     end
 
     def run_setters(source_line, target_line)
       @setters.each do |target_field, setter|
         if setter
-          target_line[target_field.to_sym] = setter.call(source_line, target_line)
+          target_line[target_field.name.to_sym] = setter.call(source_line, target_line)
         else
           puts "No setter defined for field #{target_field}"
         end
@@ -56,32 +67,38 @@ module OerpOerp
       end
     end
 
-    def set_value(target_field, &block)
-      field_sym = target_field.to_sym
-      if block_given?
-        @setters[field_sym] = block
-      else
-        # according to field definition, call the good method (copy simple value / many2one...)
-        field_definition = migration.models_matching.matching_fields[target_field]
-        raise "No #{target_field} found in the fields introspection" unless field_definition
-        @setters[field_sym] = self.send "set_#{field_definition[:ttype]}", field_sym
-      end
+    def set_value(target_field_name, &block)
+      field_sym = target_field_name.to_sym
+
+      field = migration.models_matching.field(field_sym)
+      raise "No field named #{target_field_name}!" unless field
+      create_field_setter(field, &block)
     end
 
     private
 
+    def create_field_setter(target_field, &block)
+      if block_given?
+        @setters[target_field] = block
+      else
+        # according to field definition, call the good method (copy simple value / many2one...)
+        @setters[target_field] = self.send "set_#{target_field.ttype}", target_field
+      end
+    end
+
     def create_default_setters
-      migration.models_matching.matching_fields.keys.each do |field|
-        next if @skip_fields && @skip_fields.include?(field)
-        next if @only_fields && !@only_fields.include?(field)
-        next if @setters.keys.include?(field)
-        set_value(field)
+      migration.models_matching.matching_fields.each do |field|
+        next if @skip_fields && @skip_fields.include?(field.name)
+        next if @only_fields && !@only_fields.include?(field.name)
+        next if @setters.keys.include? field # already defined in dsl files
+        create_field_setter(field)
       end
     end
 
     def set_simple(target_field)
       # must return a block
-      Proc.new { |source_line, target_line| source_line.send(target_field) }
+      # todo adapt to different methods (ooor, sequel, dict, ...), using modules ?
+      Proc.new { |source_line, target_line| source_line[target_field.name] }
     end
 
     alias_method :set_integer, :set_simple
@@ -143,23 +160,29 @@ module OerpOerp
       @after_action = block
     end
 
-    def save
+    def display_lines(source_line, target_line)
+        # TODO replace puts by logs
+        # fixme : does not display cols existing in line and not in source_line
+        # fixme move stuff relative to ooor in adapter
+        #display_source_line = @source_line.attributes.merge(@source_line.associations)
+        #display_source_line.symbolize_keys!
+        display_source_line = source_line.dup
+        display_target_line = target_line.dup
+        display_target_line.keys.each { |key| display_source_line[key] = nil unless display_source_line.keys.include? key}
+
+        puts Hirb::Helpers::Table.render [display_source_line.update('' => 'source'), display_target_line.update('' => 'target')], :description => false, :resize => false
+        puts "\n"
+    end
+
+    def save(source_line, target_line)
       # replace by target.insert or target.update called from migration after update of the line
 
       if OPTIONS[:simulation]
         # pretty display
-        # TODO replace puts by logs
-        # fixme : does not display cols existing in line and not in source_line
-        # fixme move stuff relative to ooor in adapter
-        display_source_line = @source_line.attributes.merge(@source_line.associations)
-        display_source_line.symbolize_keys!
-        display_line = @line.dup
-        @line.keys.each { |key| display_source_line[key] = nil unless display_source_line.keys.include? key}
-
-        puts Hirb::Helpers::Table.render [display_source_line.update('' => 'source'), display_line.update('' => 'target')], :description => false, :resize => false
-        puts "\n"
+        display_lines(source_line, target_line)
       else
-        target.save(@line)
+        raise NotImplementedError "Save not already implemented"
+        #target.save(target_line)
       end
     end
 

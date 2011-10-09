@@ -52,16 +52,14 @@ module OerpOerp
     end
 
     def line_actions
-      return @line_actions if @line_actions.defined?
-      @line_actions = @actions_class.new
+      return @line_actions unless @line_actions.nil?
+      @line_actions = @actions_class.new(self, &@lines_block)
       @line_actions
     end
 
     def do_operations
       @before_action.call unless @before_action or OPTIONS[:simulation]
-      source.lines.each do |from|
-        line_actions.migrate_line # todo
-      end
+      line_actions.migrate_lines(source.lines)
       @after_action.call unless @after_action or OPTIONS[:simulation]
     end
 
