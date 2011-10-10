@@ -6,12 +6,14 @@ module OerpOerp
     # include Comparable
 
     attr_writer_as_symbol :name, :ttype, :relation
+    attr_accessor :description
     attr_reader :name, :ttype, :relation, :model
 
     def initialize(attributes={})
       attributes.each do |key, value|
         method_key = "#{key}=".to_sym
         next unless self.respond_to? method_key
+        next if value.empty?
         self.send(method_key, value)
       end
     end

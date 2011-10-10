@@ -4,7 +4,7 @@ module OerpOerp
     attr_accessor :migration_name, :dependencies, :before_action, :before_save_action, :after_action, :setters, :migration_source, :migration_target
     attr_reader :migration
 
-    def initialize(migration, &block)
+    def initialize(migration, line_class=nil, &block)
       @migration = migration
 
       @setters = OrderedHash.new  # ordered hash to keep the order defined in the migration files (one could depends of another)
@@ -19,10 +19,14 @@ module OerpOerp
 
       @create = false
 
+      @line_class ||= OerpOerp::TargetLine
+
       instance_eval(&block) if block
     end
 
     def migrate_lines(lines)
+      create_default_setters
+      
       lines.each { |line| migrate_line(line) }
       
       @postponed_actions.each do |action|
@@ -31,24 +35,9 @@ module OerpOerp
     end
 
     def migrate_line(source_line)
-      line = {}
-      @before_action.call(source_line, line) unless @before_action or OPTIONS[:simulation]
-      create_default_setters
-      line = run_setters(source_line, line)
-      @before_save_action.call(source_line, line) unless @before_save_action or OPTIONS[:simulation]
-      save(source_line, line)
-      @after_action.call(source_line, line) unless @after_action or OPTIONS[:simulation]
-    end
-
-    def run_setters(source_line, target_line)
-      @setters.each do |target_field, setter|
-        if setter
-          target_line[target_field.name.to_sym] = setter.call(source_line, target_line)
-        else
-          puts "No setter defined for field #{target_field}"
-        end
-      end
-      target_line
+      line = @line_class.new(source_line, @setters, @before_action, @before_save_action, @after_action)
+      line.compute_values
+      line.save
     end
 
     def auto_migrate_fields(options)
@@ -158,32 +147,6 @@ module OerpOerp
 
     def after(&block)
       @after_action = block
-    end
-
-    def display_lines(source_line, target_line)
-        # TODO replace puts by logs
-        # fixme : does not display cols existing in line and not in source_line
-        # fixme move stuff relative to ooor in adapter
-        #display_source_line = @source_line.attributes.merge(@source_line.associations)
-        #display_source_line.symbolize_keys!
-        display_source_line = source_line.dup
-        display_target_line = target_line.dup
-        display_target_line.keys.each { |key| display_source_line[key] = nil unless display_source_line.keys.include? key}
-
-        puts Hirb::Helpers::Table.render [display_source_line.update('' => 'source'), display_target_line.update('' => 'target')], :description => false, :resize => false
-        puts "\n"
-    end
-
-    def save(source_line, target_line)
-      # replace by target.insert or target.update called from migration after update of the line
-
-      if OPTIONS[:simulation]
-        # pretty display
-        display_lines(source_line, target_line)
-      else
-        raise NotImplementedError "Save not already implemented"
-        #target.save(target_line)
-      end
     end
 
   end

@@ -3,13 +3,13 @@ module OerpOerp
   class OoorProxy < BasicObject
     attr_reader :oerp
 
-    ::OerpOerp::Pooler.register_class_proxy(:ooor, ::OerpOerp::OoorProxy)
+    ::OerpOerp::Pooler.register_class_proxy(:ooor, self)
 
-    def initialize(from)
+    def initialize(connection_name)
       @adapter_options = ::OerpOerp::OPTIONS[:ooor]
-      options = @adapter_options[from]
-      options.merge! :log_level => Logger::INFO, :scope_prefix => from.to_s.capitalize
-      @oerp = Ooor.new(options)
+      options = @adapter_options[:connections][connection_name]
+      options.merge! :log_level => ::Logger::INFO, :scope_prefix => connection_name.to_s.capitalize
+      @oerp = ::Ooor.new(options)
     end
 
     def [](model)

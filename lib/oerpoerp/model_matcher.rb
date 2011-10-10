@@ -30,11 +30,16 @@ module OerpOerp
       puts "\n"
       puts "Fields only on target :".yellow
       puts "None".green if target_only_fields.empty?
+      snippets = []
       target_only_fields.each do |field|
         puts "#{field.name} - #{field.ttype}".yellow
-        puts "    set_value :#{field.name} do |source_line, target_line|\n" <<
-             "      source_line['bar']\n" <<
-             "    end"
+        snippets << "    set_value :#{field.name} do |source_line, target_line|\n" <<
+                    "      source_line['bar']\n" <<
+                    "    end"
+      end
+      unless snippets.empty?
+        puts "Snippets :\n"
+        snippets.each { |snippet| puts snippet }
       end
 
       puts "\n"

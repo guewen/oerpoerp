@@ -4,7 +4,7 @@ module OerpOerp
     attr_reader :ooor_prefix, :oerp
 
     def oerp
-      @oerp ||= Pooler.get(self.class.proxy, self.class.connection_from)
+      @oerp ||= Pooler.get(self.class.proxy, connection_name)
     end
 
     def default_iterator
@@ -18,8 +18,9 @@ module OerpOerp
     def get_fields
       ir_model_fields = oerp['ir.model.fields'].find(:all,
                                                      :domain => [['model', '=', @model_name]],
-                                                     :fields => ['ttype', 'relation', 'name'])
-      ir_model_fields.map { |fields| fields.attributes.symbolize_keys }
+                                                     :fields => ['ttype', 'relation', 'name', 'field_description'])
+      ir_model_fields.map! { |fields| fields.attributes.symbolize_keys }
+      ir_model_fields
     end
 
   end
