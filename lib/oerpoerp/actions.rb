@@ -11,7 +11,7 @@ module OerpOerp
 
       # used in migration when some action can not be executed (for instance when a line must be assigned to a parent
       # not already created) we add a proc per action to execute at the very end of the model migration
-      @postponed_actions = []
+      @postponed_tasks = []
 
       # auto migrate options
       @only_fields = false
@@ -29,13 +29,13 @@ module OerpOerp
       
       lines.each { |line| migrate_line(line) }
       
-      @postponed_actions.each do |action|
+      @postponed_tasks.each do |action|
         action.call
       end
     end
 
     def migrate_line(source_line)
-      line = @line_class.new(source_line, @setters, @before_action, @before_save_action, @after_action)
+      line = @line_class.new(migration, @postponed_tasks, source_line, @setters, @before_action, @before_save_action, @after_action)
       line.compute_values
       line.save
     end

@@ -24,8 +24,9 @@ module OerpOerp
 
   # TODO implement options in a global migration file using DSL syntax or YAML ?
 OPTIONS = {
+  :name => 'a_static_migration',
   :verbose => true,
-  :simulation => true,
+  :simulation => false,
 
   :ooor => {
       :default_source_connection => :conn1,

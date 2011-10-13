@@ -18,17 +18,21 @@ source_with :method => :static, :connection => :conn1 do
   data do
   [
   {:id => 1,
-   :name => 'cauliflower',
+   :name => 'Cauliflowers',
    :price => 3.0,
    :category => 1},
   {:id => 2,
-   :name => 'Mango',
+   :name => 'Mangos',
    :price => 5.0,
   :category => 2},
-  {:id => 2,
-   :name => 'Carrot',
+  {:id => 3,
+   :name => 'Carrots',
    :price => 0.5,
-   :category => 1}
+   :category => 1},
+  {:id => 4,
+   :name => 'Cucumbers',
+   :price => 0.5,
+   :category => 4}
   ]
   end
 end
@@ -36,17 +40,17 @@ end
 target_with :method => :ooor do
   base_model "product.category"
 
-  fields do
-    [
-      {:name => 'id', :ttype => 'integer'},
-      {:name => 'name', :ttype => 'char'},
-      {:name => 'price', :ttype => 'float'},
-      {:name => 'category', :ttype => 'many2one', :relation => 'product.category'},
-      {:name => 'target_only_field', :ttype => 'integer'},
-      {:name => 'conflict_field', :ttype => 'char'},
-      {:name => 'relation_conflict_field', :ttype => 'many2one', :relation => 'product.supplier'},
-    ]
-  end
+  #fields do
+  #  [
+  #    {:name => 'id', :ttype => 'integer'},
+  #    {:name => 'name', :ttype => 'char'},
+  #    {:name => 'price', :ttype => 'float'},
+  #    {:name => 'category', :ttype => 'many2one', :relation => 'product.category'},
+  #    {:name => 'target_only_field', :ttype => 'integer'},
+  #    {:name => 'conflict_field', :ttype => 'char'},
+  #    {:name => 'relation_conflict_field', :ttype => 'many2one', :relation => 'product.supplier'},
+  #  ]
+  #end
 end
 
 before do
@@ -78,12 +82,34 @@ lines_actions do
     puts "before save"
   end
 
-  set_value :price do |source_line, target_line|
-    source_line[:price] * 10
-  end
+  #set_value :price do |source_line, target_line|
+  #  source_line[:price] * 10
+  #end
 
-  set_value :target_only_field do |source_line, target_line|
-    'bar'
+  #set_value :target_only_field do |source_line, target_line|
+  #  'bar'
+  #end
+
+  set_value :child_id do |source_line, target_line|
+    source_line[:name]
+  end
+  set_value :complete_name do |source_line, target_line|
+    source_line[:name]
+  end
+  set_value :parent_id do |source_line, target_line|
+    1
+  end
+  set_value :sequence do |source_line, target_line|
+    1
+  end
+  set_value :type do |source_line, target_line|
+    'normal'
+  end
+  set_value :x_conflict do |source_line, target_line|
+    source_line[:name]
+  end
+  set_value :x_my_field_on_target do |source_line, target_line|
+    source_line[:name]
   end
 
   after do |source_line, target_line|

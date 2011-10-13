@@ -96,17 +96,50 @@ module OerpOerp
     include SourceTargetCommon
     @proxy_classes = []
 
+    def write_source_id(source_model_name, source_id)
+      # write in ir_model_data
+      raise NotImplementedError "Not implemented on base class"
+    end
+
+    def find_by_source_id(source_model_name, source_id, *args)
+      # find in ir_model_data
+      raise NotImplementedError "Not implemented on base class"
+    end
+
     def connection_name
       @connection_name ||= OerpOerp::OPTIONS[self.class.proxy][:default_target_connection]
       @connection_name
     end
 
-    def insert(data_record)
-
+    def insert(source_model_name, source_id, data_record)
+      created_id = insert_only(data_record)
+      write_ref_source_id(source_model_name, source_id, created_id)
+      created_id
     end
 
-    def update(id, data_record)
-      
+    def update(resource_id, data_record)
+      raise NotImplementedError "Not implemented on base class"
+    end
+
+    private
+
+    def insert_only(data_record)
+      # Insert and returns the id of the created record
+      raise NotImplementedError "Not implemented on base class"
+    end
+
+    def write_ref_source_id(source_model_name, source_id, target_id)
+      # already done in the insert with ooor
+      #nothing to do here
+      raise NotImplementedError "Not implemented on base class"
+    end
+
+    def ir_model_data_name(source_model_name, source_id)
+      "#{source_model_name.gsub('.', '_')}/#{source_id.to_s}"
+    end
+
+    def ir_model_data_module
+      "oerpoerp/#{OerpOerp::OPTIONS[:name]}"
     end
 
   end

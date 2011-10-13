@@ -1,19 +1,29 @@
 module OerpOerp
   class TargetLine
 
-    def initialize(source_line, setters, before_action, before_save_action, after_action)
+    def initialize(migration, postponed_task, source_line, setters, before_action, before_save_action, after_action)
+      @migration = migration  # FIXME need migration ? maybe only source/target
       @source_line = source_line
       @setters = setters
       @before_action = before_action
       @before_save_action = before_save_action
       @after_action = after_action
+      @postponed_tasks = postponed_task
 
       @target_line = {} # struct ?
     end
 
+    def existing_id
+      return @existing_id if defined? @existing_id
+      # TODO specific ooor... make generic
+      resource = @migration.target.find_by_source_id(@migration.source.model_name, source_line_id, :fields => ['id'])
+      @existing_id = resource.id if resource
+      @existing_id
+    end
+
     def existing?
       # TODO check in oerp if the id of the source line exist in the ref ids
-      false
+      existing_id && true || false
     end
 
     def compute_values
@@ -54,7 +64,7 @@ module OerpOerp
       else
         if existing?
           # TODO provide a unified way to get the id of a line
-          update(@source_line.id)
+          update
         else
           insert
         end
@@ -64,12 +74,19 @@ module OerpOerp
 
     private
 
-    def update(id)
-      raise NotImplementedError "Update not already implemented"
+    def source_line_id
+      # FIXME bug with ruby 1.8.7 as all objects respond to #id
+      # TODO provide a generic method to give the id of the source. maybe define a default method
+      # which give the id overridable in dsl (will let the user choose the field which represent the id)
+      @source_line.respond_to?(:id) && @source_line.id || @source_line[:id]
+    end
+
+    def update
+      @migration.target.update(existing_id, @target_line)
     end
 
     def insert
-      raise NotImplementedError "Insert not already implemented"
+      @migration.target.insert(@migration.source.model_name, source_line_id, @target_line)
     end
 
   end
