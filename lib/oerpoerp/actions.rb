@@ -35,6 +35,7 @@ module OerpOerp
     end
 
     def migrate_line(source_line)
+      # todo refactor: blocks triggered from this class with @line_class as scope?
       line = @line_class.new(migration, @postponed_tasks, source_line, @setters, @before_action, @before_save_action, @after_action)
       line.compute_values
       line.save
@@ -57,9 +58,7 @@ module OerpOerp
     end
 
     def set_value(target_field_name, &block)
-      field_sym = target_field_name.to_sym
-
-      field = migration.models_matching.field(field_sym)
+      field = migration.models_matching.field(target_field_name.to_s)
       raise "No field named #{target_field_name}!" unless field
       create_field_setter(field, &block)
     end
@@ -71,7 +70,7 @@ module OerpOerp
         @setters[target_field] = block
       else
         # according to field definition, call the good method (copy simple value / many2one...)
-        @setters[target_field] = self.send "set_#{target_field.ttype}", target_field
+        @setters[target_field] = self.send "set_#{target_field.type}", target_field
       end
     end
 
@@ -87,7 +86,7 @@ module OerpOerp
     def set_simple(target_field)
       # must return a block
       # todo adapt to different methods (ooor, sequel, dict, ...), using modules ?
-      Proc.new { |source_line, target_line| source_line[target_field.name] }
+      Proc.new { |source_line, target_line| source_line[target_field.name.to_sym] }
     end
 
     alias_method :set_integer, :set_simple

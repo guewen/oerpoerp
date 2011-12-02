@@ -21,7 +21,7 @@ module OerpOerp
     #end
 
     def get_fields
-      raise "Missing static structure of fields in static mode! Define it with DSL method #fields, like: fields do [{:name => 'id', :ttype => 'integer'}] end" if @static_fields.nil?
+      raise "Missing static structure of fields in static mode! Define it with DSL method #fields, like: fields do [{:name => 'id', :type => 'integer'}] end" if @static_fields.nil?
       @static_fields.map { |fields| fields.symbolize_keys }
     end
 

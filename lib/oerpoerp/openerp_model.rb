@@ -12,7 +12,7 @@ module OerpOerp
 
     def add_field(attributes={})
       raise "A field must have a name!" unless attributes.include? :name
-      raise "Field name must be unique (#{attributes[:name]})!" if @fields.include? attributes[:name]
+      raise "Field name must be unique (#{attributes[:name]})!" if @fields.map{|f| f.name }.include? attributes[:name]
       @fields << OerpOerp::OpenERPField.new(attributes)
     end
 

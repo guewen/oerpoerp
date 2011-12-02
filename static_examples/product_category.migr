@@ -5,13 +5,13 @@ source_with :method => :static, :connection => :conn1 do
   base_model "product.category"
   fields do
     [
-      {:name => 'id', :ttype => 'integer'},
-      {:name => 'name', :ttype => 'char'},
-      {:name => 'price', :ttype => 'float'},
-      {:name => 'category', :ttype => 'many2one', :relation => 'product.category'},
-      {:name => 'source_only_field', :ttype => 'integer'},
-      {:name => 'conflict_field', :ttype => 'integer'},
-      {:name => 'relation_conflict_field', :ttype => 'many2one', :relation => 'product.uom'},
+      {:name => 'id', :type => 'integer'},
+      {:name => 'name', :type => 'char'},
+      {:name => 'price', :type => 'float'},
+      {:name => 'category', :type => 'many2one', :relation => 'product.category'},
+      {:name => 'source_only_field', :type => 'integer'},
+      {:name => 'conflict_field', :type => 'integer'},
+      {:name => 'relation_conflict_field', :type => 'many2one', :relation => 'product.uom'},
     ]
   end
 
@@ -42,13 +42,13 @@ target_with :method => :ooor do
 
   #fields do
   #  [
-  #    {:name => 'id', :ttype => 'integer'},
-  #    {:name => 'name', :ttype => 'char'},
-  #    {:name => 'price', :ttype => 'float'},
-  #    {:name => 'category', :ttype => 'many2one', :relation => 'product.category'},
-  #    {:name => 'target_only_field', :ttype => 'integer'},
-  #    {:name => 'conflict_field', :ttype => 'char'},
-  #    {:name => 'relation_conflict_field', :ttype => 'many2one', :relation => 'product.supplier'},
+  #    {:name => 'id', :type => 'integer'},
+  #    {:name => 'name', :type => 'char'},
+  #    {:name => 'price', :type => 'float'},
+  #    {:name => 'category', :type => 'many2one', :relation => 'product.category'},
+  #    {:name => 'target_only_field', :type => 'integer'},
+  #    {:name => 'conflict_field', :type => 'char'},
+  #    {:name => 'relation_conflict_field', :type => 'many2one', :relation => 'product.supplier'},
   #  ]
   #end
 end

@@ -6,16 +6,17 @@ before do
 end
 
 source_with :method => :ooor, :connection => :conn1 do
-  model "product.product"
+  # refactor with a face and let use "model" 
+  base_model "product.product"
 
   data do
-    source.model.all
+    model.all
   end
 
 end
 
 target_with :method => :ooor, :connection => :conn2 do
-  model "product.product"
+  base_model "product.product"
 end
 
 # TODO
@@ -39,11 +40,11 @@ lines_actions do
     puts "line before "
   end
 
-  set_value :price do |source_line, target_line|
-    source_line.price * 10
+  set_value :standard_price do |source_line, target_line|
+    source_line.standard_price * 10
   end
 
-  set_value :foo do |source_line, target_line|
+  set_value :description_purchase do |source_line, target_line|
     'bar'
   end
 

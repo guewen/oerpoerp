@@ -36,9 +36,8 @@ module OerpOerp
   end
 
   module SourceTargetCommon
-    
-    attr_accessor :model_name
-    attr_reader :model, :connection_name
+
+    attr_reader :model, :connection_name, :model_name
 
     def model_structure
       return @model_structure if defined? @model_structure
@@ -55,6 +54,7 @@ module OerpOerp
       instance_eval(&block) if block
     end
 
+    # refactor using DSL facade allowing to use model as setter
     def base_model(name)
       @model_name = name
     end

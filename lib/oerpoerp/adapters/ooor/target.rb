@@ -52,6 +52,7 @@ module OerpOerp
       data_record.each do |key, value|
         resource.send "#{key}=", value
       end
+
       resource.save
       # FIXME replace by a logger
       puts "Record #{resource.name} updated." if OPTIONS[:verbose]

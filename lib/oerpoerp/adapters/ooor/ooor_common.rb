@@ -13,14 +13,30 @@ module OerpOerp
 
     def model
       @model ||= oerp[@model_name]
+      @model
     end
 
     def get_fields
-      ir_model_fields = oerp['ir.model.fields'].find(:all,
-                                                     :domain => [['model', '=', @model_name]],
-                                                     :fields => ['ttype', 'relation', 'name', 'field_description'])
-      ir_model_fields.map! { |fields| fields.attributes.symbolize_keys }
-      ir_model_fields
+      model.reload_fields_definition if model.fields.empty?
+      each_fields = [model.fields,
+                     model.many2one_associations,
+                     model.one2many_associations,
+                     model.many2many_associations,
+                     model.polymorphic_m2o_associations]
+
+      all_fields = each_fields.reduce(:merge)
+
+      model_fields = []
+      all_fields.each_pair do |name, keys|
+        model_fields << {
+          :name => name,
+          :type => keys['type'],
+          :string => keys['string'],
+          :relation => keys['product.pricelist']
+        }
+      end
+
+      model_fields
     end
 
   end

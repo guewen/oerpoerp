@@ -24,7 +24,7 @@ module OerpOerp
       puts "Fields only on source :".yellow
       puts "None".green if source_only_fields.empty?
       source_only_fields.each do |field|
-        puts "#{field.name} - #{field.ttype}".yellow
+        puts "#{field.name} - #{field.type}".yellow
       end
 
       puts "\n"
@@ -34,7 +34,7 @@ module OerpOerp
       else
         snippets = []
         target_only_fields.each do |field|
-          puts "#{field.name} - #{field.ttype}".yellow
+          puts "#{field.name} - #{field.type}".yellow
           snippets << "  set_value :#{field.name} do |source_line, target_line|\n" <<
                       "    source_line['bar']\n" <<
                       "  end"
@@ -55,7 +55,7 @@ module OerpOerp
       puts "Matching fields (those ones will automatically be migrated if you do not redefine them in the migration file) :".green
       puts "None".red if matching_fields.empty?
       matching_fields.each do |field|
-        puts "#{field.name} - #{field.ttype} #{field.relation}".green
+        puts "#{field.name} - #{field.type} #{field.relation}".green
       end
 
       puts "\n"

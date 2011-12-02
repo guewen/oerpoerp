@@ -1,6 +1,9 @@
 module OerpOerp
   class TargetLine
 
+    # refactor: this class should be very limited, scope visible from setters (source_line, target_line, source, target ?)
+    # setters, before, after action etc + write save should be done in actions in the scope of an instance line
+
     def initialize(migration, postponed_task, source_line, setters, before_action, before_save_action, after_action)
       @migration = migration  # FIXME need migration ? maybe only source/target
       @source_line = source_line

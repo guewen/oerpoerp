@@ -7,6 +7,7 @@ require 'colorize'
 require 'hirb'
 require 'hashery/orderedhash'
 require 'ooor'
+require 'ruby-debug'
 
 require 'oerpoerp/core_ext'
 require 'oerpoerp/version'
