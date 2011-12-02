@@ -111,16 +111,16 @@ module OerpOerp
     end
 
     def set_one2many(target_field)
-      # skip! we assign many2one in a normal case
+      # skip! we assign many2one fields in a normal case
     end
 
     def set_many2one(target_field)
       # must return a block
       # get relation id using the relation of fields introspection and the
-      # class used for the references
-      # create a table to store old and new id (module oerpoerp in oerp)
       # TODO
-      Proc.new { |source_line, target_line| 1 }
+      Proc.new do |source_line, target_line|
+        migration.target.find_many2one_by_source_id(migration.source.model_name, source_line.id)
+      end
     end
 
     def set_many2many(target_field)

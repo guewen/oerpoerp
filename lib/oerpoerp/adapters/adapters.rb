@@ -134,8 +134,8 @@ module OerpOerp
       raise NotImplementedError "Not implemented on base class"
     end
 
-    def ir_model_data_name(source_model_name, source_id)
-      "#{source_model_name.gsub('.', '_')}/#{source_id.to_s}"
+    def ir_model_data_name(model_name, source_id)
+      "#{model_name.gsub('.', '_')}/#{source_id.to_s}"
     end
 
     def ir_model_data_module
