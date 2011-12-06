@@ -85,7 +85,6 @@ module OerpOerp
 
     def set_simple(target_field)
       # must return a block
-      # todo adapt to different methods (ooor, sequel, dict, ...), using modules ?
       Proc.new { |source_line, target_line| source_line[target_field.name.to_sym] }
     end
 

@@ -6,14 +6,19 @@ module OerpOerp
 
     def initialize(migration, postponed_task, source_line, setters, before_action, before_save_action, after_action)
       @migration = migration  # FIXME need migration ? maybe only source/target
-      @source_line = source_line
       @setters = setters
       @before_action = before_action
       @before_save_action = before_save_action
       @after_action = after_action
       @postponed_tasks = postponed_task
 
-      @target_line = {} # struct ?
+      source_line_fields, source_line_values = source_line.to_a.transpose
+      source_line_fields.map! {|field| field.to_sym}
+      # use Struct for source line for convenience: getters with dot notation
+      # and [] using symbols or strings]
+      @source_line = Struct.new(*source_line_fields).new(*source_line_values)
+
+      @target_line = {} # Struct ?
     end
 
     def existing_id
