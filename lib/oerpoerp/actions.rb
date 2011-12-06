@@ -19,7 +19,7 @@ module OerpOerp
 
       @create = false
 
-      @line_class ||= OerpOerp::TargetLine
+      @line_class ||= OerpOerp::ContainerLine
 
       instance_eval(&block) if block
     end
@@ -35,10 +35,19 @@ module OerpOerp
     end
 
     def migrate_line(source_line)
-      # todo refactor: blocks triggered from this class with @line_class as scope?
-      line = @line_class.new(migration, @postponed_tasks, source_line, @setters, @before_action, @before_save_action, @after_action)
-      line.compute_values
+      line = @line_class.new(migration, source_line)
+      line.execute_action(&@before_action)
+
+      @setters.select {|s| s.nil?}.keys.each do |target_field|
+        puts "No setter defined for field #{target_field.name}" #TODO log
+      end
+
+      @setters.each do |target_field, setter_block|
+        line.execute_action_on_field(target_field, &setter_block)
+      end
+      line.execute_action(&@before_save_action)
       line.save
+      line.execute_action(&@after_action)
     end
 
     def auto_migrate_fields(options)
@@ -70,7 +79,7 @@ module OerpOerp
         @setters[target_field] = block
       else
         # according to field definition, call the good method (copy simple value / many2one...)
-        @setters[target_field] = self.send "set_#{target_field.type}", target_field
+        @setters[target_field] = self.send("set_#{target_field.type}", target_field)
       end
     end
 
@@ -85,7 +94,8 @@ module OerpOerp
 
     def set_simple(target_field)
       # must return a block
-      Proc.new { |source_line, target_line| source_line[target_field.name.to_sym] }
+      # Proc will be evaluated in the ContainerLine scope
+      Proc.new { source_line[target_field.name.to_sym] }
     end
 
     alias_method :set_integer, :set_simple
@@ -99,11 +109,6 @@ module OerpOerp
     alias_method :set_datetime, :set_simple
     alias_method :set_binary, :set_simple
 
-    def set_simple(target_field)
-      # must return a block
-      raise NotImplementedError
-    end
-
     def set_one2one(target_field)
       raise NotImplementedError
     end
@@ -116,8 +121,8 @@ module OerpOerp
       # must return a block
       # get relation id using the relation of fields introspection and the
       # TODO
-      Proc.new do |source_line, target_line|
-        migration.target.find_many2one_by_source_id(migration.source.model_name, source_line.id)
+      Proc.new do
+        many2one(source_line[target_field.name.to_sym])
       end
     end
 

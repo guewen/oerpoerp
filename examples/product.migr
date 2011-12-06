@@ -36,19 +36,19 @@ lines_actions do
 #  auto_migrate_fields :only => [:name]
 #  auto_migrate_fields :exclude => [:name]
 
-  before do |source_line, target_line|
+  before do 
     puts "line before "
   end
 
-  set_value :standard_price do |source_line, target_line|
+  set_value :standard_price do
     source_line.standard_price * 10
   end
 
-  set_value :description_purchase do |source_line, target_line|
+  set_value :description_purchase do
     'bar'
   end
 
-  after do |source_line, target_line|
+  after do
     puts "line after"
   end
 

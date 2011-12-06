@@ -20,7 +20,7 @@ end
 
 lines_actions do
 
-  set_value :x_my_new_field_on_source do |source_line, target_line|
+  set_value :x_my_new_field_on_source do
     source_line.id * 10
   end
 

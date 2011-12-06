@@ -13,8 +13,9 @@ module OerpOerp
     end
 
     def find_many2one_by_source_id(many2one_model_name, source_id, *args)
+      return false unless source_id
       options = args.extract_options!
-      many2one_model = oerp.const_get(many2one_model_name.to_sym)
+      many2one_model = oerp.const_get(many2one_model_name)
       res = many2one_model.find("#{ir_model_data_module}.#{ir_model_data_name(many2one_model_name, source_id)}", options)
       return res.id if res
       raise "No record found for many2one with id #{source_id} on model #{many2one_model_name}"

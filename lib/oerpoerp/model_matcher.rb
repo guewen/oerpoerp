@@ -35,8 +35,8 @@ module OerpOerp
         snippets = []
         target_only_fields.each do |field|
           puts "#{field.name} - #{field.type}".yellow
-          snippets << "  set_value :#{field.name} do |source_line, target_line|\n" <<
-                      "    source_line['bar']\n" <<
+          snippets << "  set_value :#{field.name} do \n" <<
+                      "    source_line.bar\n" <<
                       "  end"
         end
         puts "Snippets :\n"
@@ -47,7 +47,7 @@ module OerpOerp
       puts "Conflicting fields :".red
       puts "None".red if conflicting_fields.empty?
       conflicting_fields.each do |field|
-        puts "#{field.name}".red
+        puts "#{field.name} - #{field.type} - #{field.relation}".red
 #        puts "Source : #{source_fields[field][:type]} - Target : #{target_fields[field][:type]} ".red
       end
 

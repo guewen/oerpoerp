@@ -8,7 +8,7 @@ source_with :method => :static, :connection => :conn1 do
       {:name => 'id', :type => 'integer'},
       {:name => 'name', :type => 'char'},
       {:name => 'price', :type => 'float'},
-      {:name => 'category', :type => 'many2one', :relation => 'product.category'},
+      {:name => 'parent_id', :type => 'many2one', :relation => 'product.category'},
       {:name => 'source_only_field', :type => 'integer'},
       {:name => 'conflict_field', :type => 'integer'},
       {:name => 'relation_conflict_field', :type => 'many2one', :relation => 'product.uom'},
@@ -20,19 +20,19 @@ source_with :method => :static, :connection => :conn1 do
   {:id => 1,
    :name => 'Cauliflowers',
    :price => 3.0,
-   :category => 1},
+   :parent_id => false},
   {:id => 2,
    :name => 'Mangos',
    :price => 5.0,
-  :category => 2},
+   :parent_id => 1},
   {:id => 3,
    :name => 'Carrots',
    :price => 0.5,
-   :category => 1},
+   :parent_id => 2},
   {:id => 4,
    :name => 'Cucumbers',
    :price => 0.5,
-   :category => 4}
+   :parent_id => 1}
   ]
   end
 end
@@ -74,11 +74,11 @@ lines_actions do
 #  auto_migrate_fields :only => [:name]
 #  auto_migrate_fields :exclude => [:name]
 
-  before do |source_line, target_line|
+  before do
     puts "line before "
   end
 
-  before_save do |source_line, target_line|
+  before_save do
     puts "before save"
   end
 
@@ -86,33 +86,33 @@ lines_actions do
   #  source_line[:price] * 10
   #end
 
-  #set_value :target_only_field do |source_line, target_line|
+  #set_value :target_only_field do
   #  'bar'
   #end
 
-  set_value :child_id do |source_line, target_line|
+  set_value :child_id do
     source_line[:name]
   end
-  set_value :complete_name do |source_line, target_line|
-    source_line[:name]
+  set_value :complete_name do
+    source_line[:name].upcase
   end
-  set_value :parent_id do |source_line, target_line|
+  #set_value :parent_id do
+  #  1
+  #end
+  set_value :sequence do
     1
   end
-  set_value :sequence do |source_line, target_line|
-    1
-  end
-  set_value :type do |source_line, target_line|
+  set_value :type do
     'normal'
   end
-  set_value :x_conflict do |source_line, target_line|
-    source_line[:name]
+  set_value :x_conflict do
+    source_line.name
   end
-  set_value :x_my_field_on_target do |source_line, target_line|
+  set_value :x_my_field_on_target do
     source_line[:name]
   end
 
-  after do |source_line, target_line|
+  after do
     puts "line after"
   end
 

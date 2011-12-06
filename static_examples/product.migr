@@ -70,23 +70,23 @@ lines_actions do
 #  auto_migrate_fields :only => [:name]
 #  auto_migrate_fields :exclude => [:name]
 
-  before do |source_line, target_line|
+  before do
     puts "line before "
   end
 
-  before_save do |source_line, target_line|
+  before_save do
     puts "before save"
   end
 
-  set_value :price do |source_line, target_line|
+  set_value :price do
     source_line[:price] * 10
   end
 
-  set_value :target_only_field do |source_line, target_line|
+  set_value :target_only_field do
     'bar'
   end
 
-  after do |source_line, target_line|
+  after do
     puts "line after"
   end
 

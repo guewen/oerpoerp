@@ -27,12 +27,12 @@ module OerpOerp
       all_fields = each_fields.reduce(:merge)
 
       model_fields = []
-      all_fields.each_pair do |name, keys|
+      all_fields.each do |name, keys|
         model_fields << {
           :name => name,
           :type => keys['type'],
           :string => keys['string'],
-          :relation => keys['product.pricelist']
+          :relation => keys['relation']
         }
       end
 
