@@ -74,8 +74,8 @@ module OerpOerp
     end
 
     def default_iterator
-      # must be a proc containing a object responding to #each
-      Proc.new { [] }
+      # must be a proc containing an enumerable
+      Proc.new { [].each }
     end
 
     def lines

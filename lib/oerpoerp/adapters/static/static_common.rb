@@ -9,7 +9,7 @@ module OerpOerp
     end
 
     def default_iterator
-      Proc.new { raise "In static mode, define an iterator with DSL method #data, like: data do [{:id => 1}, {:id => 2}, {:id => 3}] end)" }
+      Proc.new { raise "In static mode, define an iterator with DSL method #data, it must be an enumerable like: data { [{:id => 1}, {:id => 2}, {:id => 3}] }" }
     end
 
     def fields(&fields)
