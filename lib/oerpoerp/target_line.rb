@@ -15,9 +15,7 @@ module OerpOerp
       # and [] using symbols or strings]
 
       # TODO implement a to_struct on ooor and hash, sequel etc.
-      source_line_fields, source_line_values = source_line.to_a.transpose
-      source_line_fields.map! {|field| field.to_sym}
-      @source_line = Struct.new(*source_line_fields).new(*source_line_values)
+      @source_line = source_line.to_struct
 
       @target_line = {} # Struct ?
     end

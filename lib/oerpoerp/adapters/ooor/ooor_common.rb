@@ -8,7 +8,7 @@ module OerpOerp
     end
 
     def default_iterator
-      Proc.new { model.all.each }
+      Proc.new { model.all }
     end
 
     def model

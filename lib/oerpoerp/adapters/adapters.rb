@@ -75,7 +75,7 @@ module OerpOerp
 
     def default_iterator
       # must be a proc containing an enumerable
-      Proc.new { [].each }
+      Proc.new { [] }
     end
 
     def lines

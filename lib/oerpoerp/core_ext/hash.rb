@@ -46,4 +46,11 @@ class Hash
     raise(ArgumentError, "Unknown key(s): #{unknown_keys.join(", ")}") unless unknown_keys.empty?
   end
 
+  def to_struct
+    fields, values = to_a.transpose
+    fields.map! {|field| field.to_sym}
+    struct = Struct.new(*fields).new(*values)
+    struct
+  end
+
 end
