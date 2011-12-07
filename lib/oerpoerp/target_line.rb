@@ -14,7 +14,7 @@ module OerpOerp
       # use Struct for source line for convenience: getters with dot notation
       # and [] using symbols or strings]
 
-      # TODO implement a to_struct on ooor and hash, sequel etc.
+      # FIXME so we lose the ooor dot notation... find an idea !
       @source_line = source_line.to_struct
 
       @target_line = {} # Struct ?

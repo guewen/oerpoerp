@@ -45,7 +45,7 @@ module OerpOerp
     def migrate_line(source_line)
       line = @line_class.new(migration, source_line)
 
-      if @condition.action == :skip && line.execute_action(&@condition.block)
+      if !@condition.nil? && @condition.action == :skip && line.execute_action(&@condition.block)
         # log
         puts "Line skipped"
       else

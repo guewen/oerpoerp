@@ -11,6 +11,7 @@ require 'ruby-debug'
 
 require 'oerpoerp/core_ext'
 require 'oerpoerp/version'
+require 'oerpoerp/ooor_ext'
 require 'oerpoerp/migration_dsl'
 require 'oerpoerp/core'
 require 'oerpoerp/actions'
