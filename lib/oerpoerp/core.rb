@@ -21,10 +21,10 @@ module OerpOerp
       @migrations << self
     end
 
-    def initialize(source_class=nil, target_class=nil, actions_class=nil, &block)
-      @source_class = source_class || OerpOerp::SourceBase
-      @target_class = target_class || OerpOerp::TargetBase
-      @actions_class = actions_class || OerpOerp::MigrationActions
+    def initialize(source_class=OerpOerp::SourceBase, target_class=OerpOerp::TargetBase, actions_class=OerpOerp::Actions, &block)
+      @source_class = source_class
+      @target_class = target_class
+      @actions_class = actions_class
 
       yield self if block_given?
     end

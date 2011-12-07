@@ -1,10 +1,9 @@
 module OerpOerp
-  class MigrationActions
+  class Actions
 
-    attr_accessor :migration_name, :dependencies, :before_action, :before_save_action, :after_action, :setters, :migration_source, :migration_target
     attr_reader :migration
 
-    def initialize(migration, line_class=nil, &block)
+    def initialize(migration, line_class=OerpOerp::ContainerLine, &block)
       @migration = migration
 
       @setters = OrderedHash.new  # ordered hash to keep the order defined in the migration files (one could depends of another)
@@ -19,35 +18,46 @@ module OerpOerp
 
       @create = false
 
-      @line_class ||= OerpOerp::ContainerLine
+      @line_class = line_class
 
-      instance_eval(&block) if block
+      instance_eval(&block) if block_given?
     end
 
     def migrate_lines(lines)
       create_default_setters
-      
-      lines.each { |line| migrate_line(line) }
-      
-      @postponed_tasks.each do |action|
-        action.call
-      end
-    end
-
-    def migrate_line(source_line)
-      line = @line_class.new(migration, source_line)
-      line.execute_action(&@before_action)
 
       @setters.select {|s| s.nil?}.keys.each do |target_field|
         puts "No setter defined for field #{target_field.name}" #TODO log
       end
 
-      @setters.each do |target_field, setter_block|
-        line.execute_action_on_field(target_field, &setter_block)
+      lines.each { |line| migrate_line(line) }
+      
+      @postponed_tasks.each do |action|
+        # beware of the scope, check maybe postponed tasks are not realistic, maybe only use delayed lines execution
+        action.call
       end
-      line.execute_action(&@before_save_action)
-      line.save
-      line.execute_action(&@after_action)
+    end
+
+    def condition(action=:skip, &block)
+      @condition = Struct.new(:action, :block).new(action, block)
+    end
+
+    def migrate_line(source_line)
+      line = @line_class.new(migration, source_line)
+
+      if @condition.action == :skip && line.execute_action(&@condition.block)
+        # log
+        puts "Line skipped"
+      else
+        line.execute_action(&@before_action)
+
+        @setters.each do |target_field, setter_block|
+          line.execute_action_on_field(target_field, &setter_block)
+        end
+        line.execute_action(&@before_save_action)
+        line.save
+        line.execute_action(&@after_action)
+      end
     end
 
     def auto_migrate_fields(options)

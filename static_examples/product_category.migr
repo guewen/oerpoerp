@@ -82,6 +82,10 @@ lines_actions do
     puts "before save"
   end
 
+  condition :skip do  # :skip, :delay
+    source_line.id == 4
+  end
+
   #set_value :price do |source_line, target_line|
   #  source_line[:price] * 10
   #end

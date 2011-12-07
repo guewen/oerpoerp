@@ -42,11 +42,13 @@ module OerpOerp
     end
 
     def execute_action(&block)
-      instance_eval(&block) if block_given?
+      result = block_given? ? instance_eval(&block) : nil
+      result
     end
 
     def execute_action_on_field(field, &block)
       target_line[field.name.to_sym] = execute_action(&block)
+      target_line[field.name.to_sym]
       # struct version
       #target_line.send("#{field.to_sym}=", execute_action(&block))
     end
@@ -67,16 +69,13 @@ module OerpOerp
     end
 
     def save
-      if OPTIONS[:simulation]
         # pretty display
-        display
-      else
+      display if OPTIONS[:verbose]
+      unless OPTIONS[:simulation]
         if existing?
           # TODO provide a unified way to get the id of a line
-          display #remove
           update
         else
-          display #remove
           insert
         end
       end
