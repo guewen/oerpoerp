@@ -95,9 +95,9 @@ module OerpOerp
 
     def create_default_setters
       migration.models_matching.matching_fields.each do |field|
-        next if @skip_fields && @skip_fields.include?(field.name)
-        next if @only_fields && !@only_fields.include?(field.name)
-        next if @setters.keys.include? field # already defined in dsl files
+        next if @skip_fields && @skip_fields.map(&:intern).include?(field.name.intern)
+        next if @only_fields && !@only_fields.map(&:intern).include?(field.name.intern)
+        next if @setters.include? field # already defined in dsl files
         create_field_setter(field)
       end
     end
@@ -131,9 +131,13 @@ module OerpOerp
       # must return a block
       Proc.new do
         # FIXME smarter ways to achieve that
+        target_id = nil
         source_id = source_line.send(target_field.name.intern)
-        source_id = source_id.id if source_line.is_a? Ooor::OpenObjectResource
-        many2one(source_id)
+        if source_id
+          source_id = source_id.id if source_line.is_a? Ooor::OpenObjectResource
+          target_id = many2one(source_id)
+        end
+        target_id
       end
     end
 

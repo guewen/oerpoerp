@@ -56,7 +56,7 @@ module OerpOerp
       # target struct version
       #target_line.send("#{field.to_sym}=", execute_action(&block))
     rescue Exception => e
-      raise "Failed to assign a value to field #{field.name} (#{field.description}) with error : #{e}"
+      raise "Failed to assign a value to field #{field.name} (#{field.string}) with error : #{e}"
     end
 
     def display
@@ -103,7 +103,6 @@ module OerpOerp
     end
 
     def source_line_id
-      pp @source_line.id
       @source_line.id
     end
 

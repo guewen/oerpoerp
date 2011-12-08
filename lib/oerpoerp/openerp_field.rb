@@ -5,7 +5,7 @@ module OerpOerp
     # TODO ?
     # include Comparable
 
-    attr_accessor :name, :type, :relation, :description
+    attr_accessor :name, :type, :relation, :string
 
     def initialize(attributes={})
       attributes.each do |key, value|

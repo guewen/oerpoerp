@@ -35,7 +35,8 @@ lines_actions do
 #  auto_migrate_fields false
 #  auto_migrate_fields :only => [:name]
   auto_migrate_fields :exclude => [:property_stock_production,
-                                   :property_stock_inventory]
+                                   :property_stock_inventory,
+                                   :property_stock_procurement]
 
   before do 
     puts "line before "
