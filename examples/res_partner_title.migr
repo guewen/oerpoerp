@@ -2,7 +2,6 @@ name :res_partner_title
 depends []
 
 source_with :method => :ooor, :connection => :conn1 do
-  # refactor with a face and let use "model" 
   base_model "res.partner.title"
 end
 

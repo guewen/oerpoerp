@@ -51,15 +51,9 @@ module OerpOerp
       @target
     end
 
-    def line_actions
-      return @line_actions unless @line_actions.nil?
-      @line_actions = @actions_class.new(self, &@lines_block)
-      @line_actions
-    end
-
     def do_operations
       @before_action.call unless @before_action.nil? or OPTIONS[:simulation]
-      line_actions.migrate_lines(source.lines)
+      @actions_class.migrate_lines(self, source.lines, &@lines_block)
       @after_action.call unless @after_action.nil? or OPTIONS[:simulation]
     end
 
@@ -67,7 +61,6 @@ module OerpOerp
       puts "Starting import of #{@name} migration file from #{@source_model} model to #{@target_model} model"
       introspect_models
       puts "Starting lines import"
-      @actions = @actions_class.new(self, &@lines_block)
       do_operations
     end
 
