@@ -58,9 +58,9 @@ module OerpOerp
     end
 
     def do_operations
-      @before_action.call unless @before_action or OPTIONS[:simulation]
+      @before_action.call unless @before_action.nil? or OPTIONS[:simulation]
       line_actions.migrate_lines(source.lines)
-      @after_action.call unless @after_action or OPTIONS[:simulation]
+      @after_action.call unless @after_action.nil? or OPTIONS[:simulation]
     end
 
     def run
