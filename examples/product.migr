@@ -34,10 +34,15 @@ lines_actions do
 
 #  auto_migrate_fields false
 #  auto_migrate_fields :only => [:name]
-#  auto_migrate_fields :exclude => [:name]
+  auto_migrate_fields :exclude => [:property_stock_production,
+                                   :property_stock_inventory]
 
   before do 
     puts "line before "
+  end
+
+  set_value :location_id do
+    1
   end
 
   set_value :standard_price do

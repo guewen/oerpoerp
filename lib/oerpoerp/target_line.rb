@@ -53,8 +53,10 @@ module OerpOerp
     def execute_action_on_field(field, &block)
       target_line[field.name.to_sym] = execute_action(&block)
       target_line[field.name.to_sym]
-      # struct version
+      # target struct version
       #target_line.send("#{field.to_sym}=", execute_action(&block))
+    rescue Exception => e
+      raise "Failed to assign a value to field #{field.name} (#{field.description}) with error : #{e}"
     end
 
     def display
@@ -101,10 +103,8 @@ module OerpOerp
     end
 
     def source_line_id
-      # FIXME bug with ruby 1.8.7 as all objects respond to #id
-      # TODO provide a generic method to give the id of the source. maybe define a default method
-      # which give the id overridable in dsl (will let the user choose the field which represent the id)
-      @source_line.respond_to?(:id) && @source_line.id || @source_line[:id]
+      pp @source_line.id
+      @source_line.id
     end
 
     def update

@@ -105,7 +105,7 @@ module OerpOerp
     def set_simple(target_field)
       # must return a block
       # Proc will be evaluated in the ContainerLine scope
-      Proc.new { source_line[target_field.name.to_sym] }
+      Proc.new { source_line.send target_field.name.intern }
     end
 
     alias_method :set_integer, :set_simple
@@ -129,10 +129,11 @@ module OerpOerp
 
     def set_many2one(target_field)
       # must return a block
-      # get relation id using the relation of fields introspection and the
-      # TODO
       Proc.new do
-        many2one(source_line[target_field.name.to_sym])
+        # FIXME smarter ways to achieve that
+        source_id = source_line.send(target_field.name.intern)
+        source_id = source_id.id if source_line.is_a? Ooor::OpenObjectResource
+        many2one(source_id)
       end
     end
 
@@ -147,7 +148,10 @@ module OerpOerp
       # how to manage assignation to parents not already imported ?
       # create an array on MigrationBase and fill it with the ids to update ?
       # Maybe fill it with Proc updates ?
+      # or fill a dict at each line migration with source_id and status
+      # like: {1 => :saved, 2 => :updated, 4 => :skipped, 5 => :retry}
       # must return a block
+
     end
 
     def before(&block)

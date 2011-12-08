@@ -17,8 +17,8 @@ module OerpOerp
       options = args.extract_options!
       many2one_model = oerp.const_get(many2one_model_name)
       res = many2one_model.find("#{ir_model_data_module}.#{ir_model_data_name(many2one_model_name, source_id)}", options)
-      return res.id if res
-      raise "No record found for many2one with id #{source_id} on model #{many2one_model_name}"
+      raise "No record found for many2one with id #{source_id} on model #{many2one_model_name}" unless res
+      res.id
     end
 
     #def write_ref_source_id(source_model_name, source_id, target_id)
