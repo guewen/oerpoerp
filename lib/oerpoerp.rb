@@ -12,7 +12,6 @@ require 'ruby-debug'
 require 'oerpoerp/core_ext'
 require 'oerpoerp/version'
 require 'oerpoerp/ooor_ext'
-require 'oerpoerp/migration_dsl'
 require 'oerpoerp/core'
 require 'oerpoerp/actions'
 require 'oerpoerp/target_line'
@@ -51,8 +50,10 @@ OPTIONS = {
   }
 
 
-  r = MigrationCore.new
-  r.initialize_from_file( ARGV[0] )
-  r.run
+  Migration.add(ARGV[0])
+  Migration.sort!
+  Migration.migrations.each do |migration|
+    migration.run
+  end
 
 end

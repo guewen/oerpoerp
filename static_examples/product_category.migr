@@ -1,7 +1,7 @@
 name :product
-depends [:product_category]
+dependencies [:product_category]
 
-source_with :method => :static, :connection => :conn1 do
+source_is :method => :static, :connection => :conn1 do
   base_model "product.category"
   fields do
     [
@@ -37,7 +37,7 @@ source_with :method => :static, :connection => :conn1 do
   end
 end
 
-target_with :method => :ooor do
+target_is :method => :ooor do
   base_model "product.category"
 
   #fields do
@@ -68,7 +68,7 @@ after do
   puts "after"
 end
 
-lines_actions do
+actions do
 
 #  auto_migrate_fields false
 #  auto_migrate_fields :only => [:name]

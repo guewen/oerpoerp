@@ -1,5 +1,5 @@
 name :product
-depends [:product_category]
+dependencies [:product_category]
 
 before do
   puts "before"
