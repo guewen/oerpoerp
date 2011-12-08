@@ -11,11 +11,15 @@ module OerpOerp
     def initialize(migration, source_line)
       @migration = migration  # FIXME need migration ? maybe only source/target
 
-      # use Struct for source line for convenience: getters with dot notation
-      # and [] using symbols or strings]
-
-      # FIXME so we lose the ooor dot notation... find an idea !
-      @source_line = source_line.to_struct
+      # use Struct for source line for convenience
+      # getters with dot notation and [] using symbols or strings]
+      # for ooor source, we keep the original object to keep the chain dot notation
+      case source_line
+        when Ooor::OpenObjectResource
+          @source_line = source_line
+        else
+         @source_line = source_line.to_struct
+      end
 
       @target_line = {} # Struct ?
     end
