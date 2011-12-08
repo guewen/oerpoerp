@@ -36,7 +36,8 @@ lines_actions do
 #  auto_migrate_fields :only => [:name]
   auto_migrate_fields :exclude => [:property_stock_production,
                                    :property_stock_inventory,
-                                   :property_stock_procurement]
+                                   :property_stock_procurement,
+                                   :product_tmpl_id]
 
   before do 
     puts "line before "
@@ -48,6 +49,28 @@ lines_actions do
 
   set_value :standard_price do
     source_line.standard_price * 10
+  end
+
+  # todo multiple fields block set_value :uom_id, :uom_po_id do
+  set_value :uom_id do
+    uom = source.oerp['product.uom'].find(:first, :domain => [['name', '=', 'PCE']], :fields => ['id'])
+    uom ? uom.id : nil
+  end
+
+  set_value :uom_po_id do
+    1
+  end
+
+  set_value :company_id do
+    1
+  end
+
+  set_value :seller_id do
+    nil
+  end
+
+  set_value :categ_id do
+    1
   end
 
   set_value :description_purchase do

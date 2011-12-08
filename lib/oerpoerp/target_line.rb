@@ -85,6 +85,10 @@ module OerpOerp
           insert
         end
       end
+    rescue Exception => e
+      # log
+      puts target_line
+      raise
     end
 
     private
