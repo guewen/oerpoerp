@@ -9,6 +9,8 @@ module OerpOerp
 
     class DSL
       # facade class
+      # Public methods are available from the DSL .migr files
+      # when declaring an action
 
       attr_reader :actions
 
@@ -111,7 +113,7 @@ module OerpOerp
       end
 
       def set_value(target_field_name, &block)
-        field = migration.models_matching.field(target_field_name.to_s)
+        field = @migration.models_matching.field(target_field_name.to_s)
         raise "No field named #{target_field_name}!" unless field
         create_field_setter(field, &block)
       end
